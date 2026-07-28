@@ -1,25 +1,26 @@
-"use-server";
-
 import { JwtPayload } from "jsonwebtoken";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+
 import { getNewAccessToken } from "./service/refreshToken";
 import { jwtUtils } from "./utils/jwt";
+
 const AUTH_ROUTES = ["/login", "/register"];
 const PUBLIC_ROUTES = ["/", "/properties"];
 
 export async function proxy(request: NextRequest) {
-  console.log("Proxy running:", request.nextUrl.pathname);
-
   const pathname = request.nextUrl.pathname;
-  const cookieStore = await cookies();
+
+  const response = NextResponse.next();
 
   let accessToken = request.cookies.get("accessToken")?.value;
   const refreshToken = request.cookies.get("refreshToken")?.value;
 
+  // Verify access token
   let decodedAccessToken = accessToken
     ? jwtUtils.verifyToken(accessToken, process.env.JWT_ACCESS_SECRET as string)
     : null;
+
+  // Verify refresh token
   const decodedRefreshToken = refreshToken
     ? jwtUtils.verifyToken(
         refreshToken,
@@ -27,73 +28,91 @@ export async function proxy(request: NextRequest) {
       )
     : null;
 
-  if (!decodedAccessToken && decodedRefreshToken) {
-    const result = await getNewAccessToken();
-    if (result.success) {
-      const newAccessToken = result.data.accessToken;
+  //?  Refresh access token if expired but refresh token is valid
 
-      cookieStore.set("accessToken", newAccessToken);
-      accessToken = newAccessToken;
+  if (!decodedAccessToken?.success && decodedRefreshToken?.success) {
+    const result = await getNewAccessToken();
+
+    if (result.success) {
+      accessToken = result.data.accessToken as string;
+
+      response.cookies.set("accessToken", accessToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24,
+      });
+
       decodedAccessToken = jwtUtils.verifyToken(
-        accessToken!,
+        accessToken,
         process.env.JWT_ACCESS_SECRET as string,
       );
     }
   }
 
-  let userRole = null;
-  if (!decodedAccessToken?.success) {
-    cookieStore.delete("accessToken");
+  //? Remove invalid access token
+
+  if (accessToken && !decodedAccessToken?.success) {
+    response.cookies.delete("accessToken");
   }
 
-  if (decodedAccessToken?.success && decodedAccessToken.data) {
-    userRole = (decodedAccessToken.data as JwtPayload).role;
-  }
+  //? Extract user role
 
-  if (accessToken && AUTH_ROUTES.includes(pathname)) {
+  const userRole =
+    decodedAccessToken?.success && decodedAccessToken.data
+      ? (decodedAccessToken.data as JwtPayload).role
+      : null;
+
+  //? Redirect authenticated users away from auth pages
+
+  if (decodedAccessToken?.success && AUTH_ROUTES.includes(pathname)) {
     if (userRole === "TENANT") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
-    } else if (userRole === "ADMIN") {
+    }
+
+    if (userRole === "ADMIN") {
       return NextResponse.redirect(new URL("/admin-dashboard", request.url));
-    } else if (userRole === "LANDLORD") {
+    }
+
+    if (userRole === "LANDLORD") {
       return NextResponse.redirect(new URL("/landlord-dashboard", request.url));
     }
   }
 
+  //? Check public/auth routes
+
   const isPublic = PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + "/"),
-  );
-  const isAuthRoute = AUTH_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + "/"),
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-  if (!accessToken && !isPublic && !isAuthRoute) {
+  const isAuthRoute = AUTH_ROUTES.includes(pathname);
+
+  //? Redirect unauthenticated users to login
+
+  if (!decodedAccessToken?.success && !isPublic && !isAuthRoute) {
     const loginUrl = new URL("/login", request.url);
-
     loginUrl.searchParams.set("redirectTo", pathname);
+
     return NextResponse.redirect(loginUrl);
   }
 
-  // Authorization : Role based access control
+  //? Role-based authorization
+
   if (pathname.startsWith("/dashboard") && userRole !== "TENANT") {
-    return NextResponse.redirect(new URL("/not-found", request.url));
-  } else if (pathname.startsWith("/admin-dashboard") && userRole !== "ADMIN") {
-    return NextResponse.redirect(new URL("/not-found", request.url));
-  } else if (
-    pathname.startsWith("/landlord-dashboard") &&
-    userRole !== "LANDLORD"
-  ) {
     return NextResponse.redirect(new URL("/not-found", request.url));
   }
 
-  //   return NextResponse.redirect(new URL("/", request.url));
-  return NextResponse.next();
+  if (pathname.startsWith("/admin-dashboard") && userRole !== "ADMIN") {
+    return NextResponse.redirect(new URL("/not-found", request.url));
+  }
+
+  if (pathname.startsWith("/landlord-dashboard") && userRole !== "LANDLORD") {
+    return NextResponse.redirect(new URL("/not-found", request.url));
+  }
+
+  return response;
 }
 
 export const config = {
-  matcher: [
-    // '/dashboard/:path*',
-    // '/admin-dashboard/:path*',
-    "/((?!api|_next/static|favicon.ico|_next/image|.*\\.png$).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
