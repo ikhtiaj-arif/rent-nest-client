@@ -12,12 +12,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSearchParams } from "next/navigation";
+import { initialAuthState } from "@/lib/types";
 
 export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const searchParams = useSearchParams();
     const redirectTo = searchParams.get("redirectTo") ?? ""
-    const [state, action, pending] = useActionState(loginAction.bind(null, redirectTo), false)
+    const [state, action, pending] = useActionState(loginAction.bind(null, redirectTo), initialAuthState)
 
     useEffect(() => {
         if (!state) return;

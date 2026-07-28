@@ -11,28 +11,27 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { toast } from "sonner";
 
+import { initialAuthState } from "@/lib/types";
+import { useRouter } from "next/navigation";
 import { registerAction } from "../_actions/authActions";
 
 
 
 export default function RegisterForm() {
     const [showPassword, setShowPassword] = useState(false);
-
+    const router = useRouter();
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
     const [state, action, pending] = useActionState(registerAction,
-        {
-            success: false,
-            statusCode: 0,
-            message: "",
-        });
+        initialAuthState);
 
     useEffect(() => {
         if (!state) return;
 
         if (state.success) {
             toast.success(state.message || "Registration successful. Please Login");
+            router.push("/login");
         } else {
             toast.error(state.message || "Registration failed.");
         }
