@@ -1,9 +1,17 @@
 
-const RegisterPage = () => {
-    return (
-        <div>RegisterPage
-        </div>
-    );
-};
+import AuthCard from "../_components/AuthCard";
+import RegisterForm from "../_components/RegisterForm";
 
-export default RegisterPage;
+export default function RegisterPage() {
+    return (
+        <AuthCard
+            title="Create Account"
+            description="Create your landlord or tenant account."
+            footerText="Already have an account?"
+            footerHref="/login"
+            footerLabel="Sign in"
+        >
+            <RegisterForm />
+        </AuthCard>
+    );
+}

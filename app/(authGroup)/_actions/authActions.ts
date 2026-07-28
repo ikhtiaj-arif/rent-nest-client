@@ -14,14 +14,21 @@ type LoginState = {
     refreshToken: string;
   };
 };
+type RegisterState = {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data?: unknown;
+};
 
 export const loginAction = async (
-  //   redirectTo: string,
+  redirectTo: string,
   prevState: LoginState,
   formData: FormData,
 ) => {
   const email = formData.get("email");
   const password = formData.get("password");
+
   const payload = {
     email,
     password,
@@ -34,6 +41,7 @@ export const loginAction = async (
     },
     body: JSON.stringify(payload),
   });
+
   const result = await res.json();
 
   if (result.success) {
@@ -49,17 +57,53 @@ export const loginAction = async (
       maxAge: 60 * 60 * 24 * 7,
       sameSite: "lax",
     });
-    //redirect to requested route //? server side navigation
-    // push keeps history, replace removes current url form the history
+
     const decodedToken = jwt.decode(result.data.accessToken) as JwtPayload;
 
-    if (decodedToken.role === "ADMIN") redirect("/admin-dashboard");
-    if (decodedToken.role === "AUTHOR") redirect("/author-dashboard");
-    if (decodedToken.role === "USER") redirect("/dashboard");
+    if (
+      redirectTo &&
+      typeof redirectTo === "string" &&
+      redirectTo.startsWith("/") &&
+      !redirectTo.startsWith("//")
+    ) {
+      redirect(redirectTo);
+    }
 
-    // console.log(decodedToken);
-    // redirect("/dashboard", "push");
+    if (decodedToken.role === "USER") {
+      redirect("/dashboard");
+    } else if (decodedToken.role === "ADMIN") {
+      redirect("/admin-dashboard");
+    } else if (decodedToken.role === "AUTHOR") {
+      redirect("/author-dashboard");
+    }
   }
+
+  return result;
+};
+
+export const registerAction = async (
+  prevState: RegisterState,
+  formData: FormData,
+): Promise<RegisterState> => {
+  const payload = {
+    name: formData.get("name"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  };
+
+  const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await res.json();
+  redirect("/login");
+  console.log("Register Response:", result);
 
   return result;
 };
