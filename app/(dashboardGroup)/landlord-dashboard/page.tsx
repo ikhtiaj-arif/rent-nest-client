@@ -2,7 +2,7 @@
 const LandlordDashboardPage = () => {
     return (
         <div>
-LandlordDashboardPage
+            LandlordDashboardPage
         </div>
     );
 };

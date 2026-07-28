@@ -3,7 +3,6 @@
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
-import { toast } from "sonner";
 
 import { loginAction } from "../_actions/authActions";
 
@@ -11,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSearchParams } from "next/navigation";
 import { initialAuthState } from "@/lib/types";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
@@ -23,11 +22,12 @@ export default function LoginForm() {
     useEffect(() => {
         if (!state) return;
 
-        if (state.success) {
-            toast.success(state.message);
-        } else {
-            toast.error(state.message);
-        }
+        // if (state.success) {
+        //     toast.success(state.message);
+
+        // } else {
+        //     toast.error(state.message);
+        // }
     }, [state]);
 
     return (
@@ -40,6 +40,7 @@ export default function LoginForm() {
                     type="email"
                     placeholder="Enter your email"
                     required
+                    defaultValue={'admin@example.com'}
                 />
             </div>
 
@@ -62,6 +63,7 @@ export default function LoginForm() {
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         className="pr-10"
+                        defaultValue={'SuperSecurePassword123!'}
                     />
 
                     <button

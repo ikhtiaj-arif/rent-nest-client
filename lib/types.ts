@@ -3,6 +3,7 @@ export type AuthState = {
   statusCode: number;
   message: string;
   data?: unknown;
+    redirectTo?: string;
 };
 
 export const initialAuthState: AuthState = {

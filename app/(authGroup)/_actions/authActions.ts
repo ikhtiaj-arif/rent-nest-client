@@ -4,7 +4,7 @@ import { AuthState } from "@/lib/types";
 import { handleApiError } from "@/service/hadleApiError";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
-
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
 // type LoginState = {
@@ -85,6 +85,7 @@ export const loginAction = async (
     ) {
       redirect(redirectTo);
     }
+    // console.log("decoded", decodedToken);
     if (decodedToken.role === "TENANT") {
       redirect("/tenant-dashboard");
     } else if (decodedToken.role === "ADMIN") {
@@ -94,22 +95,22 @@ export const loginAction = async (
     } else {
       redirect("/");
     }
+
   } catch (error) {
-     return handleApiError(error);
+     if (isRedirectError(error)) {
+    throw error;
+  }
+    return handleApiError(error);
   }
 
- 
-
-//   return result;
+  //   return result;
 };
 
 export const registerAction = async (
   prevState: AuthState,
   formData: FormData,
 ): Promise<AuthState> => {
-
   try {
-
     const payload = {
       name: formData.get("name"),
       email: formData.get("email"),
@@ -118,45 +119,34 @@ export const registerAction = async (
       confirmPassword: formData.get("confirmPassword"),
     };
 
-
     const res = await fetch(
       `${process.env.BACKEND_API_URL}/api/auth/register`,
       {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        body:JSON.stringify(payload),
-      }
+        body: JSON.stringify(payload),
+      },
     );
-
 
     const result = await res.json();
 
-
-    if(!res.ok || !result.success){
-
+    if (!res.ok || !result.success) {
       return {
-        success:false,
-        statusCode:result.statusCode ?? res.status,
-        message:result.message ?? "Registration failed",
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message ?? "Registration failed",
       };
-
     }
 
-
     return {
-      success:true,
-      statusCode:result.statusCode,
-      message:result.message ?? "Registration successful",
-      data:result.data,
+      success: true,
+      statusCode: result.statusCode,
+      message: result.message ?? "Registration successful",
+      data: result.data,
     };
-
-
-  } catch(error){
-
+  } catch (error) {
     return handleApiError(error);
-
   }
-
 };
