@@ -1,4 +1,7 @@
 
+import { Navbar } from "@/components/shared/Navbar";
+import { getMe } from "@/service/getMe";
+
 
 const DashboardLayout = async (
     {
@@ -7,10 +10,11 @@ const DashboardLayout = async (
         children: React.ReactNode
     }
 ) => {
-    //    const user = await getMe();
+    const user = await getMe();
     return (
         <div className="min-h-screen flex flex-col">
-            {/* <Navbar user={user} /> */}
+            <Navbar user={user} />
+            {/* <Navbar /> */}
             {/* <SidebarProvider> */}
             <div className="flex flex-1">
                 {/* <DashboardSidebar user={user} /> */}
