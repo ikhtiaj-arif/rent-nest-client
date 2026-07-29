@@ -49,3 +49,20 @@ export interface IUser {
 export type NavbarProps = {
   user: IUser;
 };
+
+
+export type Property = {
+  id: string;
+  title: string;
+  city: string;
+  price: number;
+  isAvailable: boolean;
+  averageRating: number;
+  totalReviews: number;
+  category: {
+    name: string;
+  };
+  landlord: {
+    name: string;
+  };
+};

@@ -21,10 +21,10 @@ const AuthCard = ({
     return (
         <div className="relative w-full max-w-md">
             {/* Background decoration */}
-            <div className="absolute inset-0 rounded-3xl">
+            {/* <div className="absolute inset-0 rounded-3xl">
                 <div className="absolute -left-10 -top-10 h-72 w-72 rounded-full bg-primary/30 blur-3xl" />
                 <div className="absolute -bottom-10 -right-10 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
-            </div>
+            </div> */}
 
             <div className="relative rounded-3xl border bg-card p-8 shadow-xl">
                 {/* Logo */}
