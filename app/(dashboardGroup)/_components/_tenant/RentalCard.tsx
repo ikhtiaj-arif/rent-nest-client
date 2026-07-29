@@ -60,25 +60,7 @@ export function RentalRequestCard({
           </div>
         </div>
 
-        {/* {property?.averageRating !== undefined && property.totalReviews !== undefined && (
-          <div className="flex items-center gap-1 text-sm">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <span
-                  key={i}
-                  className={`text-lg ${
-                    i < property?.averageRating ? 'text-amber-400' : 'text-muted-foreground'
-                  }`}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-            <span className="text-muted-foreground">({property.totalReviews} reviews)</span>
-          </div>
-        )} */}
-
-        <Link href={`/tenant/rental-requests/${id}`}>
+        <Link href={`/dashboard/rental-requests/${id}`}>
           <Button
             variant="outline"
             className="w-full gap-2 group"

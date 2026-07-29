@@ -2,8 +2,6 @@
 
 import { PaymentCard } from "./PaymentCard";
 
- 
-
 interface Payment {
   id: string;
   amount: number;

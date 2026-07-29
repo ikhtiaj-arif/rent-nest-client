@@ -71,7 +71,7 @@ export function PaymentCard({
           <p className="text-xs text-muted-foreground">{rentalRequest.property.city}</p>
         </div>
 
-        <Link href={`/tenant/payments/${id}`}>
+        <Link href={`/dashboard/payments/${id}`}>
           <Button
             variant="outline"
             className="w-full gap-2 group"

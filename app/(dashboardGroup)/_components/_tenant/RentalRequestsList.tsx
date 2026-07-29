@@ -2,8 +2,6 @@
 
 import { RentalRequestCard } from "./RentalCard";
 
-
-
 interface RentalRequest {
   id: string;
   status: 'ACTIVE' | 'APPROVED' | 'PENDING' | 'REJECTED';

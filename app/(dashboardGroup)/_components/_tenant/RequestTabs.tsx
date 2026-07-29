@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
- 
 import { Home, CreditCard } from 'lucide-react';
 import { PaymentsList } from './PaymentList';
 import { RentalRequestsList } from './RentalRequestsList';
