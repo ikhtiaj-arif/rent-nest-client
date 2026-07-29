@@ -93,16 +93,17 @@ export const getPaymentById = async (id: string) => {
 };
 
 export const createRentalRequestAction = async (
-  prevState: AuthState,
+  _prevState: AuthState,
   formData: FormData,
 ): Promise<AuthState> => {
   const headers = await getAuthHeaders();
 
   const payload = {
-    moveInDate: formData.get("moveInDate"),
+    moveInDate: new Date(formData.get("moveInDate") as string).toISOString(),
     propertyId: formData.get("propertyId"),
   };
 
+  console.log("payload", payload);
   const res = await fetch(`${process.env.BACKEND_API_URL}/api/rentals`, {
     method: "POST",
     headers: {
@@ -112,5 +113,5 @@ export const createRentalRequestAction = async (
     body: JSON.stringify(payload),
   });
 
-  return res.json();
+  return await res.json();
 };

@@ -16,10 +16,10 @@ const DashboardLayout = async (
     return (
         <div className="min-h-screen flex flex-col">
             {/* Background decoration */}
-            <div className="absolute inset-0 rounded-3xl">
+            {/* <div className="absolute inset-0 rounded-3xl">
                 <div className="absolute -left-10 -top-10 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
                 <div className="absolute -bottom-10 -right-10 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
-            </div>
+            </div> */}
             <Navbar user={user} />
             {/* <Navbar /> */}
             <SidebarProvider>

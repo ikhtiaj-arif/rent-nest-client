@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getMe } from "@/service/getMe";
 import { getPropertyById } from "../../_actions/propertyActions";
 import PropertyHero from "../../_components/PropertyHero";
 import PropertyInfo from "../../_components/PropertyInfo";
@@ -14,7 +15,7 @@ const PropertyByIdPage = async ({
     params: Promise<{ id: string }>;
 }) => {
     const { id } = await params;
-
+    const user = await getMe();
     const result = await getPropertyById(id);
 
     if (!result?.success) {
@@ -26,7 +27,7 @@ const PropertyByIdPage = async ({
     return (
         <section className="container mx-auto px-4 py-10 space-y-10">
 
-            <PropertyHero property={property} />
+            <PropertyHero property={property} isAuthenticated={user?.success} />
 
             <PropertyInfo property={property} />
 
