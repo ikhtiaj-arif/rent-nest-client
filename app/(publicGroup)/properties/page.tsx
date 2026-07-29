@@ -1,8 +1,9 @@
 import { Property } from "@/lib/types";
-import { getCategories, getProperties } from "../_actions/propertyActions";
+import { getFilterOptions, getProperties } from "../_actions/propertyActions";
 import PropertiesCard from "../_components/PropertiesCard";
-import SearchBar from "../_components/SearchBar";
 import PropertyFilters from "../_components/PropertyFilters";
+import PropertyPagination from "../_components/PropertyPagination";
+import SearchBar from "../_components/SearchBar";
 
 const PropertiesPage = async ({
     searchParams,
@@ -12,108 +13,111 @@ const PropertiesPage = async ({
     const query = await searchParams;
 
 
-    const [propertiesRes, categoriesRes] = await Promise.all([
-        getProperties({ query }),
-        getCategories(),
-    ]);
+    const propertiesRes = await getProperties({ query })
+
+    const filterOptionsRes = await getFilterOptions()
+
 
     const properties = propertiesRes.data.data;
     const meta = propertiesRes.data.meta;
 
-    const categories = categoriesRes.data;
+    const categories = filterOptionsRes?.data?.categories;
+    const cities = filterOptionsRes?.data?.cities;
+
+    console.log(filterOptionsRes);
 
 
     return (
         <section className="container mx-auto px-4 py-8">
 
-      {/* Header */}
+            {/* Header */}
 
-      <div className="mb-8 space-y-2">
+            <div className="mb-8 space-y-2">
 
-        <h1 className="text-4xl font-bold tracking-tight">
-          Discover Properties
-        </h1>
+                <h1 className="text-4xl font-bold tracking-tight">
+                    Discover Properties
+                </h1>
 
-        <p className="text-muted-foreground">
-          Browse rental homes, apartments and premium
-          properties across Bangladesh.
-        </p>
-
-      </div>
-
-      {/* Search */}
-
-      <SearchBar />
-
-      <div className="mt-8 flex flex-col gap-8 lg:flex-row">
-
-        {/* Filters */}
-
-        <aside className="lg:w-72 shrink-0">
-
-          <PropertyFilters
-            categories={categories}
-            currentQuery={query}
-          />
-
-        </aside>
-
-        {/* Right */}
-
-        <main className="flex-1 space-y-6">
-
-          {/* Top */}
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-            <div>
-              <p className="font-medium">
-                {meta.total} Properties Found
-              </p>
-
-              <p className="text-sm text-muted-foreground">
-                Showing page {meta.page} of {meta.totalPage}
-              </p>
-            </div>
-
-            {/* <PropertySort /> */}
-
-          </div>
-
-          {/* Grid */}
-
-          {properties.length ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-
-              {properties.map((property: Property) => (
-                <PropertiesCard
-                  key={property.id}
-                  property={property}
-                />
-              ))}
+                <p className="text-muted-foreground">
+                    Browse rental homes, apartments and premium
+                    properties across Bangladesh.
+                </p>
 
             </div>
-          ) : (
-            <div className="rounded-xl border p-12 text-center">
 
-              <h3 className="text-xl font-semibold">
-                No Properties Found
-              </h3>
+            {/* Search */}
 
-              <p className="mt-2 text-muted-foreground">
-                Try changing your search or filters.
-              </p>
+            <div className="mt-8 flex flex-col gap-8 lg:flex-row">
+
+                {/* Filters */}
+
+                <aside className="lg:w-72 shrink-0">
+
+                    <PropertyFilters
+                        categories={categories}
+                        cities={cities}
+                    />
+
+                </aside>
+
+                {/* Right */}
+
+                <main className="flex-1 space-y-6">
+
+                    {/* Top */}
+
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                        <div>
+                            <p className="font-medium">
+                                {meta.total} Properties Found
+                            </p>
+
+                            <p className="text-sm text-muted-foreground">
+                                Showing page {meta.page} of {meta.totalPage}
+                            </p>
+                        </div>
+
+
+                        <SearchBar />
+
+
+                    </div>
+
+                    {/* Grid */}
+
+                    {properties.length ? (
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+
+                            {properties.map((property: Property) => (
+                                <PropertiesCard
+                                    key={property.id}
+                                    property={property}
+                                />
+                            ))}
+
+                        </div>
+                    ) : (
+                        <div className="rounded-xl border p-12 text-center">
+
+                            <h3 className="text-xl font-semibold">
+                                No Properties Found
+                            </h3>
+
+                            <p className="mt-2 text-muted-foreground">
+                                Try changing your search or filters.
+                            </p>
+
+                        </div>
+                    )}
+
+                    <PropertyPagination meta={meta} />
+
+                </main>
 
             </div>
-          )}
 
-          {/* <PropertyPagination meta={meta} /> */}
-
-        </main>
-
-      </div>
-
-    </section>
+        </section>
     );
 };
 

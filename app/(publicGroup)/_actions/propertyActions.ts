@@ -30,9 +30,15 @@ export const getProperties = async ({
   if (query?.maxPrice) {
     params.set("maxPrice", query.maxPrice as string);
   }
+  if (query?.page) {
+    params.set("page", query.page as string);
+  }
+  if (query?.limit) {
+    params.set("limit", query.limit as string);
+  }
 
   const url = `${process.env.BACKEND_API_URL}/api/properties?${params}`;
-  console.log("URL:", url);
+  //   console.log("URL:", url);
   const res = await fetch(url, {
     cache: "no-store",
   });
@@ -51,12 +57,21 @@ export const getPropertyById = async (id: string) => {
   return result;
 };
 
-export const getCategories = async() => {
-      const url = `${process.env.BACKEND_API_URL}/api/categories`;
+export const getCategories = async () => {
+  const url = `${process.env.BACKEND_API_URL}/api/categories`;
   console.log("URL:", url);
   const res = await fetch(url, {
     cache: "no-store",
   });
   const result = await res.json();
   return result;
-}
+};
+export const getFilterOptions = async () => {
+  const url = `${process.env.BACKEND_API_URL}/api/properties/filter-options`;
+  console.log("URL:", url);
+  const res = await fetch(url, {
+    cache: "no-store",
+  });
+  const result = await res.json();
+  return result;
+};
