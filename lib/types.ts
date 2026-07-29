@@ -1,4 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { LucideProps } from "lucide-react";
+import { ForwardRefExoticComponent, RefAttributes } from "react";
+
 export type AuthState = {
   success: boolean;
   statusCode: number;
@@ -50,7 +52,6 @@ export type NavbarProps = {
   user: IUser;
 };
 
-
 export type Property = {
   id: string;
   title: string;
@@ -65,6 +66,14 @@ export type Property = {
   landlord: {
     name: string;
   };
-  createdAt:string
-  updatedAt:string
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ISidebarItem = {
+  label: string;
+  href: string;
+  icon: ForwardRefExoticComponent<
+    Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
+  >;
 };
