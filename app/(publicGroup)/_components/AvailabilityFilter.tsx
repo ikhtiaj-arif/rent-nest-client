@@ -80,13 +80,14 @@ export default function AvailabilityFilter() {
                                 key={option.value}
                                 className="flex items-center space-x-2"
                             >
+                                {/* Prefixed id to avoid duplicate IDs when both mobile/desktop panels are in DOM */}
                                 <RadioGroupItem
-                                    id={option.value}
+                                    id={`availability-${option.value}`}
                                     value={option.value}
                                 />
 
                                 <Label
-                                    htmlFor={option.value}
+                                    htmlFor={`availability-${option.value}`}
                                     className="cursor-pointer font-normal"
                                 >
                                     {option.label}

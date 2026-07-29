@@ -1,21 +1,19 @@
 "use client";
 
 import {
-    usePathname,
-    useRouter,
-    useSearchParams,
-} from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
-
-import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    usePathname,
+    useRouter,
+    useSearchParams,
+} from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 
 export default function PriceFilter() {
     const router = useRouter();
@@ -34,7 +32,7 @@ export default function PriceFilter() {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            const params = new URLSearchParams(searchParams.toString());
+            const params = new URLSearchParams(searchParams);
 
             if (minPrice) {
                 params.set("minPrice", minPrice);
@@ -56,34 +54,19 @@ export default function PriceFilter() {
         }, 500);
 
         return () => clearTimeout(timeout);
-    }, [
-        minPrice,
-        maxPrice,
-        pathname,
-        router,
-        searchParams,
-        startTransition,
-    ]);
+    }, [minPrice, maxPrice]);
 
     return (
-        <Accordion
-            type="single"
-            collapsible
-            defaultValue="price"
-        >
+        <Accordion type="single" collapsible defaultValue="price">
             <AccordionItem value="price">
                 <AccordionTrigger>
                     Monthly Rent
                 </AccordionTrigger>
 
                 <AccordionContent>
-
                     <div className="grid grid-cols-2 gap-3">
-
                         <div className="space-y-2">
-                            <Label>
-                                Minimum
-                            </Label>
+                            <Label>Minimum</Label>
 
                             <Input
                                 type="number"
@@ -97,9 +80,7 @@ export default function PriceFilter() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label>
-                                Maximum
-                            </Label>
+                            <Label>Maximum</Label>
 
                             <Input
                                 type="number"
@@ -111,9 +92,7 @@ export default function PriceFilter() {
                                 }
                             />
                         </div>
-
                     </div>
-
                 </AccordionContent>
             </AccordionItem>
         </Accordion>

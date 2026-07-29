@@ -24,7 +24,7 @@ const PropertiesPage = async ({
     const categories = filterOptionsRes?.data?.categories;
     const cities = filterOptionsRes?.data?.cities;
 
-    console.log(filterOptionsRes);
+
 
 
     return (

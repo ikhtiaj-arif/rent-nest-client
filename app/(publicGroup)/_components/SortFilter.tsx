@@ -88,13 +88,14 @@ export default function SortFilter() {
                                 key={option.value}
                                 className="flex items-center space-x-2"
                             >
+                                {/* Prefixed id to avoid duplicate IDs when both mobile/desktop panels are in DOM */}
                                 <RadioGroupItem
                                     value={option.value}
-                                    id={option.value}
+                                    id={`sort-${option.value}`}
                                 />
 
                                 <Label
-                                    htmlFor={option.value}
+                                    htmlFor={`sort-${option.value}`}
                                     className="cursor-pointer font-normal"
                                 >
                                     {option.label}

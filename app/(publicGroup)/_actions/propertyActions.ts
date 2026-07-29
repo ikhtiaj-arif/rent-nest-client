@@ -36,9 +36,17 @@ export const getProperties = async ({
   if (query?.limit) {
     params.set("limit", query.limit as string);
   }
+  if (query?.city) {
+    params.set("city", query.city as string);
+  }
+  if (query?.categoryId) {
+    params.set("categoryId", query.categoryId as string);
+  }
+  if (query?.sort) {
+    params.set("sort", query.sort as string);
+  }
 
   const url = `${process.env.BACKEND_API_URL}/api/properties?${params}`;
-  //   console.log("URL:", url);
   const res = await fetch(url, {
     cache: "no-store",
   });
@@ -49,7 +57,6 @@ export const getProperties = async ({
 
 export const getPropertyById = async (id: string) => {
   const url = `${process.env.BACKEND_API_URL}/api/properties/${id}`;
-  console.log("URL:", url);
   const res = await fetch(url, {
     cache: "no-store",
   });
@@ -59,7 +66,6 @@ export const getPropertyById = async (id: string) => {
 
 export const getCategories = async () => {
   const url = `${process.env.BACKEND_API_URL}/api/categories`;
-  console.log("URL:", url);
   const res = await fetch(url, {
     cache: "no-store",
   });
@@ -68,9 +74,8 @@ export const getCategories = async () => {
 };
 export const getFilterOptions = async () => {
   const url = `${process.env.BACKEND_API_URL}/api/properties/filter-options`;
-  console.log("URL:", url);
   const res = await fetch(url, {
-    cache: "no-store",
+    next: { revalidate: 3600 },
   });
   const result = await res.json();
   return result;

@@ -3,30 +3,39 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { useRef } from 'react';
+import { useRef, useTransition } from 'react';
 
 const SearchBar = () => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams();
+    const [, startTransition] = useTransition();
     const debouncedReference = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const handleSearch = (value: string) => {
 
-        //? clear debounce reference from call stack
+        //? Clear debounce reference from call stack
         if (debouncedReference.current) {
             clearTimeout(debouncedReference.current)
         }
-        //? using debouncing to prevent rendering on every key stroke
+
+        //? Debounce to prevent rendering on every key stroke
         debouncedReference.current = setTimeout(() => {
-            const params = new URLSearchParams()
+            // ✅ Preserve existing filters — only update searchTerm
+            const params = new URLSearchParams(searchParams.toString())
+
             if (value) {
                 params.set('searchTerm', value)
             } else {
                 params.delete("searchTerm")
             }
-            router.push(`${pathname}?${params.toString()}`)
 
+            // Reset to page 1 on new search
+            params.set("page", "1")
+
+            startTransition(() => {
+                router.push(`${pathname}?${params.toString()}`)
+            })
         }, 500)
     }
 

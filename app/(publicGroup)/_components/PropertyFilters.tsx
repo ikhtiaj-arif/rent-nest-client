@@ -18,17 +18,12 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { Filter } from "lucide-react";
+import Link from "next/link";
 import AvailabilityFilter from "./AvailabilityFilter";
 import CategoryFilter from "./CategoryFilter";
-import SortFilter from "./SortFilter";
-import PriceFilter from "./PriceFilter";
 import CityFilter from "./CityFilter";
-
-// import SortFilter from "./SortFilter";
-// import AvailabilityFilter from "./AvailabilityFilter";
-// import CategoryFilter from "./CategoryFilter";
-// import CityFilter from "./CityFilter";
-// import PriceFilter from "./PriceFilter";
+import PriceFilter from "./PriceFilter";
+import SortFilter from "./SortFilter";
 
 interface Category {
     id: string;
@@ -40,29 +35,27 @@ interface Props {
     cities: string[];
 }
 
+// Extracted as a real component so only one instance is mounted at a time
+// (mobile sheet OR desktop card — not both simultaneously).
+function FiltersContent({ categories, cities }: Props) {
+    return (
+        <div className="space-y-2">
+            <SortFilter />
+            <AvailabilityFilter />
+            <CategoryFilter categories={categories} />
+            <CityFilter cities={cities} />
+            <PriceFilter />
+        </div>
+    );
+}
+
 export default function PropertyFilters({
     categories,
     cities,
 }: Props) {
-    const FiltersContent = (
-        <div className="space-y-2">
-
-            <SortFilter />
-
-            <AvailabilityFilter />
-
-            <CategoryFilter categories={categories} />
-
-            <CityFilter cities={cities} />
-
-            <PriceFilter />
-
-        </div>
-    );
-
     return (
         <>
-            {/* Mobile */}
+            {/* Mobile — only visible below lg breakpoint */}
 
             <div className="mb-6 lg:hidden">
                 <Sheet>
@@ -84,16 +77,20 @@ export default function PropertyFilters({
                             <SheetTitle>
                                 Filters
                             </SheetTitle>
+
                         </SheetHeader>
 
                         <div className="mt-6">
-                            {FiltersContent}
+                            <FiltersContent
+                                categories={categories}
+                                cities={cities}
+                            />
                         </div>
                     </SheetContent>
                 </Sheet>
             </div>
 
-            {/* Desktop */}
+            {/* Desktop — only visible at lg and above */}
 
             <Card className="sticky top-24 hidden lg:block">
 
@@ -102,12 +99,23 @@ export default function PropertyFilters({
                     <CardTitle>
                         Filters
                     </CardTitle>
-
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                    >
+                        <Link href="/properties">
+                            Clear
+                        </Link>
+                    </Button>
                 </CardHeader>
 
                 <CardContent>
 
-                    {FiltersContent}
+                    <FiltersContent
+                        categories={categories}
+                        cities={cities}
+                    />
 
                 </CardContent>
 
