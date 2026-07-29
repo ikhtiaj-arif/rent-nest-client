@@ -65,4 +65,6 @@ export type Property = {
   landlord: {
     name: string;
   };
+  createdAt:string
+  updatedAt:string
 };

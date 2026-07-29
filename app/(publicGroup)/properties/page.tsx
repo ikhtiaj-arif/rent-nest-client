@@ -1,9 +1,9 @@
 import { Property } from "@/lib/types";
 import { getFilterOptions, getProperties } from "../_actions/propertyActions";
 import PropertiesCard from "../_components/PropertiesCard";
-import PropertyFilters from "../_components/PropertyFilters";
 import PropertyPagination from "../_components/PropertyPagination";
 import SearchBar from "../_components/SearchBar";
+import PropertyFilters from "../_components/PropertyFilters";
 
 const PropertiesPage = async ({
     searchParams,
