@@ -62,7 +62,11 @@ export type Property = {
   totalReviews: number;
   category: {
     name: string;
+    description: string;
   };
+  area: number;
+  furnished: boolean;
+  availableFrom: string;
   landlord: {
     name: string;
   };

@@ -1,7 +1,9 @@
+import PropertyForm from "../../_components/PropertyForm";
 
 const LandlordPropertiesPage = () => {
     return (
-        <div>LandlordPropertiesPage
+        <div>
+               <PropertyForm mode="create" />
 
         </div>
     );
