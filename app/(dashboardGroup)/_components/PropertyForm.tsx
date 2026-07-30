@@ -138,21 +138,25 @@ export default function PropertyForm({
                     ) : (
                         <Button>
                             <PlusIcon data-icon="inline-start" />
-                            Create Post
+                            Create Property
                         </Button>
                     )
                 }
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
-                <DialogHeader>
-                    <DialogTitle>
-                        {mode === "edit" ? "Edit Post" : "Create Post"}
+            <DialogContent className="  w-[95vw]
+                                        max-w-6xl
+                                        max-h-[90vh]
+                                        
+                                        p-0">
+                <DialogHeader className="border-b px-8 py-6">
+                    <DialogTitle className="text-2xl">
+                        {mode === "edit" ? "Edit Property" : "Create Property"}
                     </DialogTitle>
                 </DialogHeader>
                 <form
                     action={formAction}
                     //  encType="multipart/form-data"
-                    className="mx-auto max-w-5xl space-y-8"
+                    className="max-h-[calc(90vh-90px)] overflow-y-auto px-8 py-6"
                 >
                     {/* Property Details */}
 
