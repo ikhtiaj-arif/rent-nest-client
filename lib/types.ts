@@ -64,6 +64,7 @@ export type Property = {
     name: string;
     description: string;
   };
+  images: [];
   area: number;
   furnished: boolean;
   availableFrom: string;

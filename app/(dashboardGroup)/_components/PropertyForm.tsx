@@ -1,17 +1,18 @@
 "use client";
 
+import { Badge, Loader2, PencilIcon, Plus, PlusIcon, UploadCloud } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
-import { Badge, Loader2, Plus, UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { toast } from "sonner";
- 
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Property, initialAuthState } from "@/lib/types";
 import { createProperty, updateProperty } from "../_actions/landlordActions";
 
@@ -26,8 +27,8 @@ export default function PropertyForm({
 }: Props) {
     const action =
         mode === "edit" && property
-            // ? updateProperty.bind(null, property.id)
-            ? updateProperty
+            ? updateProperty.bind(null, property.id)
+            // ? updateProperty
             : createProperty;
 
     const [state, formAction, pending] = useActionState(
@@ -36,12 +37,12 @@ export default function PropertyForm({
     );
 
     const [images, setImages] = useState<
-  {
-    file: File;
-    preview: string;
-    isPrimary: boolean;
-  }[]
->([]);
+        {
+            file: File;
+            preview: string;
+            isPrimary: boolean;
+        }[]
+    >([]);
 
     useEffect(() => {
         if (!state) return;
@@ -49,9 +50,9 @@ export default function PropertyForm({
         if (state.success) {
             toast.success(
                 state.message ??
-                    (mode === "create"
-                        ? "Property created successfully."
-                        : "Property updated successfully.")
+                (mode === "create"
+                    ? "Property created successfully."
+                    : "Property updated successfully.")
             );
         } else if (state.message) {
             toast.error(state.message);
@@ -60,402 +61,441 @@ export default function PropertyForm({
 
 
     const handleImagesChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-) => {
-    const files = Array.from(e.target.files ?? []);
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const files = Array.from(e.target.files ?? []);
 
-    if (!files.length) return;
+        if (!files.length) return;
 
-    const mapped = files.map((file) => ({
-        file,
-        preview: URL.createObjectURL(file),
-        isPrimary: false,
-    }));
+        const mapped = files.map((file) => ({
+            file,
+            preview: URL.createObjectURL(file),
+            isPrimary: false,
+        }));
 
-    setImages((prev) => {
-        const updated = [...prev, ...mapped];
+        setImages((prev) => {
+            const updated = [...prev, ...mapped];
 
-        if (!updated.some((img) => img.isPrimary)) {
-            updated[0].isPrimary = true;
+            if (!updated.some((img) => img.isPrimary)) {
+                updated[0].isPrimary = true;
+            }
+
+            return updated;
+        });
+    };
+
+    const removeImage = (index: number) => {
+        setImages((prev) => {
+            const updated = [...prev];
+
+            URL.revokeObjectURL(updated[index].preview);
+
+            const removedPrimary = updated[index].isPrimary;
+
+            updated.splice(index, 1);
+
+            if (removedPrimary && updated.length) {
+                updated[0].isPrimary = true;
+            }
+
+            return updated;
+        });
+    };
+
+    const setPrimary = (index: number) => {
+        setImages((prev) =>
+            prev.map((img, i) => ({
+                ...img,
+                isPrimary: i === index,
+            }))
+        );
+    };
+    const [open, setOpen] = useState(false);
+
+
+
+    useEffect(() => {
+        if (!state) return;
+
+        if (state.success) {
+            toast.success(state.message || (mode === "edit" ? "Post updated successfully" : "Post created successfully"));
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- closing the dialog is the intended reaction to the server action's result, not a render loop
+            setOpen(false);
+        } else {
+            toast.error(state.message || "Something went wrong");
         }
-
-        return updated;
-    });
-};
-
-const removeImage = (index: number) => {
-    setImages((prev) => {
-        const updated = [...prev];
-
-        URL.revokeObjectURL(updated[index].preview);
-
-        const removedPrimary = updated[index].isPrimary;
-
-        updated.splice(index, 1);
-
-        if (removedPrimary && updated.length) {
-            updated[0].isPrimary = true;
-        }
-
-        return updated;
-    });
-};
-
-const setPrimary = (index: number) => {
-    setImages((prev) =>
-        prev.map((img, i) => ({
-            ...img,
-            isPrimary: i === index,
-        }))
-    );
-};
+    }, [state, mode]);
 
     return (
-        <form
-            action={formAction}
-            //  encType="multipart/form-data"
-            className="mx-auto max-w-5xl space-y-8"
-        >
-            {/* Property Details */}
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                {
+                    mode === "edit" ? (
+                        <Button variant="outline" size="sm">
+                            <PencilIcon data-icon="inline-start" />
+                            Edit
+                        </Button>
+                    ) : (
+                        <Button>
+                            <PlusIcon data-icon="inline-start" />
+                            Create Post
+                        </Button>
+                    )
+                }
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>
+                        {mode === "edit" ? "Edit Post" : "Create Post"}
+                    </DialogTitle>
+                </DialogHeader>
+                <form
+                    action={formAction}
+                    //  encType="multipart/form-data"
+                    className="mx-auto max-w-5xl space-y-8"
+                >
+                    {/* Property Details */}
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>
-                        Property Details
-                    </CardTitle>
-                </CardHeader>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                Property Details
+                            </CardTitle>
+                        </CardHeader>
 
-                <CardContent className="grid gap-6 md:grid-cols-2">
+                        <CardContent className="grid gap-6 md:grid-cols-2">
 
-                    <div className="space-y-2 md:col-span-2">
-                        <Label>Title</Label>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label>Title</Label>
 
-                        <Input
-                            name="title"
-                            defaultValue={property?.title}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="title"
+                                    defaultValue={property?.title}
+                                    required
+                                />
+                            </div>
 
-                    <div className="space-y-2 md:col-span-2">
-                        <Label>Description</Label>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label>Description</Label>
 
-                        <Textarea
-                            name="description"
-                            // defaultValue={property?.description}
-                            className="min-h-36"
-                            required
-                        />
-                    </div>
+                                <Textarea
+                                    name="description"
+                                    // defaultValue={property?.description}
+                                    className="min-h-36"
+                                    required
+                                />
+                            </div>
 
-                    <div className="space-y-2">
-                        <Label>City</Label>
+                            <div className="space-y-2">
+                                <Label>City</Label>
 
-                        <Input
-                            name="city"
-                            defaultValue={property?.city}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="city"
+                                    defaultValue={property?.city}
+                                    required
+                                />
+                            </div>
 
-                    <div className="space-y-2">
-                        <Label>Address</Label>
+                            <div className="space-y-2">
+                                <Label>Address</Label>
 
-                        <Input
-                            name="address"
-                            // defaultValue={property?.address}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="address"
+                                    // defaultValue={property?.address}
+                                    required
+                                />
+                            </div>
 
-                </CardContent>
-            </Card>
+                        </CardContent>
+                    </Card>
 
-            {/* Features */}
+                    {/* Features */}
 
-            <Card>
+                    <Card>
 
-                <CardHeader>
-                    <CardTitle>
-                        Property Features
-                    </CardTitle>
-                </CardHeader>
+                        <CardHeader>
+                            <CardTitle>
+                                Property Features
+                            </CardTitle>
+                        </CardHeader>
 
-                <CardContent className="grid gap-6 md:grid-cols-4">
+                        <CardContent className="grid gap-6 md:grid-cols-4">
 
-                    <div className="space-y-2">
-                        <Label>Price</Label>
+                            <div className="space-y-2">
+                                <Label>Price</Label>
 
-                        <Input
-                            name="price"
-                            type="number"
-                            defaultValue={property?.price}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="price"
+                                    type="number"
+                                    defaultValue={property?.price}
+                                    required
+                                />
+                            </div>
 
-                    <div className="space-y-2">
-                        <Label>Bedrooms</Label>
+                            <div className="space-y-2">
+                                <Label>Bedrooms</Label>
 
-                        <Input
-                            name="bedrooms"
-                            type="number"
-                            // defaultValue={property?.bedrooms}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="bedrooms"
+                                    type="number"
+                                    // defaultValue={property?.bedrooms}
+                                    required
+                                />
+                            </div>
 
-                    <div className="space-y-2">
-                        <Label>Bathrooms</Label>
+                            <div className="space-y-2">
+                                <Label>Bathrooms</Label>
 
-                        <Input
-                            name="bathrooms"
-                            type="number"
-                            // defaultValue={property?.bathrooms}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="bathrooms"
+                                    type="number"
+                                    // defaultValue={property?.bathrooms}
+                                    required
+                                />
+                            </div>
 
-                    <div className="space-y-2">
-                        <Label>Area (sqft)</Label>
+                            <div className="space-y-2">
+                                <Label>Area (sqft)</Label>
 
-                        <Input
-                            name="area"
-                            type="number"
-                            defaultValue={property?.area}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="area"
+                                    type="number"
+                                    defaultValue={property?.area}
+                                    required
+                                />
+                            </div>
 
-                </CardContent>
+                        </CardContent>
 
-            </Card>
+                    </Card>
 
-            {/* Category */}
+                    {/* Category */}
 
-            <Card>
+                    <Card>
 
-                <CardHeader>
-                    <CardTitle>
-                        Category
-                    </CardTitle>
-                </CardHeader>
+                        <CardHeader>
+                            <CardTitle>
+                                Category
+                            </CardTitle>
+                        </CardHeader>
 
-                <CardContent className="grid gap-6 md:grid-cols-2">
+                        <CardContent className="grid gap-6 md:grid-cols-2">
 
-                    <div className="space-y-2">
-                        <Label>Category Name</Label>
+                            <div className="space-y-2">
+                                <Label>Category Name</Label>
 
-                        <Input
-                            name="categoryName"
-                            defaultValue={property?.category?.name}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="categoryName"
+                                    defaultValue={property?.category?.name}
+                                    required
+                                />
+                            </div>
 
-                    <div className="space-y-2">
-                        <Label>Category Description</Label>
+                            <div className="space-y-2">
+                                <Label>Category Description</Label>
 
-                        <Input
-                            name="categoryDescription"
-                            defaultValue={property?.category?.description}
-                            required
-                        />
-                    </div>
+                                <Input
+                                    name="categoryDescription"
+                                    defaultValue={property?.category?.description}
+                                    required
+                                />
+                            </div>
 
-                </CardContent>
+                        </CardContent>
 
-            </Card>
+                    </Card>
 
-            {/* Availability */}
+                    {/* Availability */}
 
-            <Card>
+                    <Card>
 
-                <CardHeader>
-                    <CardTitle>
-                        Availability
-                    </CardTitle>
-                </CardHeader>
+                        <CardHeader>
+                            <CardTitle>
+                                Availability
+                            </CardTitle>
+                        </CardHeader>
 
-                <CardContent className="space-y-6">
+                        <CardContent className="space-y-6">
 
-                    <div className="grid gap-6 md:grid-cols-2">
+                            <div className="grid gap-6 md:grid-cols-2">
 
-                        <div className="space-y-2">
-                            <Label>
-                                Available From
+                                <div className="space-y-2">
+                                    <Label>
+                                        Available From
+                                    </Label>
+
+                                    <Input
+                                        type="date"
+                                        name="availableFrom"
+                                        defaultValue={
+                                            property?.availableFrom?.split("T")[0]
+                                        }
+                                        required
+                                    />
+                                </div>
+
+                            </div>
+
+                            <div className="flex gap-8">
+
+                                <Label className="flex items-center gap-2">
+                                    <Checkbox
+                                        name="available"
+                                    // defaultChecked={
+                                    //     property?.available ?? true
+                                    // }
+                                    />
+
+                                    Available
+                                </Label>
+
+                                <Label className="flex items-center gap-2">
+                                    <Checkbox
+                                        name="furnished"
+                                        defaultChecked={
+                                            property?.furnished
+                                        }
+                                    />
+
+                                    Furnished
+                                </Label>
+
+                            </div>
+
+                        </CardContent>
+
+                    </Card>
+
+                    {/* Images */}
+                    <Card>
+
+                        <CardHeader>
+
+                            <CardTitle>
+                                Property Images
+                            </CardTitle>
+
+                            <CardDescription>
+                                Upload high-quality photos. Select one as the cover image.
+                            </CardDescription>
+
+                        </CardHeader>
+
+                        <CardContent className="space-y-5">
+
+                            <Label
+                                htmlFor="images"
+                                className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed hover:border-primary transition"
+                            >
+                                <UploadCloud className="mb-3 h-8 w-8" />
+
+                                <p className="font-medium">
+                                    Upload Images
+                                </p>
+
+                                <p className="text-sm text-muted-foreground">
+                                    JPG, PNG, WEBP
+                                </p>
                             </Label>
 
                             <Input
-                                type="date"
-                                name="availableFrom"
-                                defaultValue={
-                                    property?.availableFrom?.split("T")[0]
-                                }
-                                required
-                            />
-                        </div>
-
-                    </div>
-
-                    <div className="flex gap-8">
-
-                        <Label className="flex items-center gap-2">
-                            <Checkbox
-                                name="available"
-                                // defaultChecked={
-                                //     property?.available ?? true
-                                // }
+                                id="images"
+                                name="images"
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImagesChange}
                             />
 
-                            Available
-                        </Label>
+                            {images.length > 0 && (
 
-                        <Label className="flex items-center gap-2">
-                            <Checkbox
-                                name="furnished"
-                                defaultChecked={
-                                    property?.furnished
-                                }
-                            />
+                                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
 
-                            Furnished
-                        </Label>
+                                    {images.map((image, index) => (
 
-                    </div>
+                                        <div
+                                            key={index}
+                                            className="group relative overflow-hidden rounded-xl border"
+                                        >
 
-                </CardContent>
+                                            <img
+                                                src={image.preview}
+                                                alt=""
+                                                className="aspect-square w-full object-cover"
+                                            />
 
-            </Card>
+                                            {image.isPrimary && (
+                                                <Badge className="absolute left-2 top-2">
+                                                    Cover
+                                                </Badge>
+                                            )}
 
-            {/* Images */}
-<Card>
+                                            <div className="absolute inset-x-0 bottom-0 flex gap-2 bg-black/60 p-2 opacity-0 transition group-hover:opacity-100">
 
-    <CardHeader>
+                                                {!image.isPrimary && (
 
-        <CardTitle>
-            Property Images
-        </CardTitle>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="secondary"
+                                                        className="flex-1"
+                                                        onClick={() => setPrimary(index)}
+                                                    >
+                                                        Cover
+                                                    </Button>
 
-        <CardDescription>
-            Upload high-quality photos. Select one as the cover image.
-        </CardDescription>
+                                                )}
 
-    </CardHeader>
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    onClick={() => removeImage(index)}
+                                                >
+                                                    Remove
+                                                </Button>
 
-    <CardContent className="space-y-5">
+                                            </div>
 
-        <Label
-            htmlFor="images"
-            className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed hover:border-primary transition"
-        >
-            <UploadCloud className="mb-3 h-8 w-8" />
+                                        </div>
 
-            <p className="font-medium">
-                Upload Images
-            </p>
+                                    ))}
 
-            <p className="text-sm text-muted-foreground">
-                JPG, PNG, WEBP
-            </p>
-        </Label>
+                                    <Label
+                                        htmlFor="images"
+                                        className="flex aspect-square cursor-pointer items-center justify-center rounded-xl border-2 border-dashed hover:border-primary transition"
+                                    >
+                                        <Plus className="h-8 w-8" />
+                                    </Label>
 
-        <Input
-            id="images"
-            name="images"
-            type="file"
-            multiple
-            accept="image/*"
-            className="hidden"
-            onChange={handleImagesChange}
-        />
-
-        {images.length > 0 && (
-
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-
-                {images.map((image, index) => (
-
-                    <div
-                        key={index}
-                        className="group relative overflow-hidden rounded-xl border"
-                    >
-
-                        <img
-                            src={image.preview}
-                            alt=""
-                            className="aspect-square w-full object-cover"
-                        />
-
-                        {image.isPrimary && (
-                            <Badge className="absolute left-2 top-2">
-                                Cover
-                            </Badge>
-                        )}
-
-                        <div className="absolute inset-x-0 bottom-0 flex gap-2 bg-black/60 p-2 opacity-0 transition group-hover:opacity-100">
-
-                            {!image.isPrimary && (
-
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="secondary"
-                                    className="flex-1"
-                                    onClick={() => setPrimary(index)}
-                                >
-                                    Cover
-                                </Button>
+                                </div>
 
                             )}
 
-                            <Button
-                                type="button"
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => removeImage(index)}
-                            >
-                                Remove
-                            </Button>
+                        </CardContent>
 
-                        </div>
+                    </Card>
+
+                    <div className="flex justify-end">
+
+                        <Button
+                            type="submit"
+                            size="lg"
+                            disabled={pending}
+                        >
+                            {pending && (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+
+                            {mode === "create"
+                                ? "Create Property"
+                                : "Save Changes"}
+                        </Button>
 
                     </div>
-
-                ))}
-
-                <Label
-                    htmlFor="images"
-                    className="flex aspect-square cursor-pointer items-center justify-center rounded-xl border-2 border-dashed hover:border-primary transition"
-                >
-                    <Plus className="h-8 w-8" />
-                </Label>
-
-            </div>
-
-        )}
-
-    </CardContent>
-
-</Card>
-
-            <div className="flex justify-end">
-
-                <Button
-                    type="submit"
-                    size="lg"
-                    disabled={pending}
-                >
-                    {pending && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-
-                    {mode === "create"
-                        ? "Create Property"
-                        : "Save Changes"}
-                </Button>
-
-            </div>
-        </form>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 }
