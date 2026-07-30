@@ -5,6 +5,18 @@ import { revalidateTag } from "next/cache";
 import { AuthState } from "@/lib/types";
 import { isAccessTokenExist } from "@/service/refreshToken";
 
+const getAuthCookie = async () => {
+  const accessToken = await isAccessTokenExist();
+
+  if (!accessToken) {
+    return null;
+  }
+
+  return {
+    Cookie: `accessToken=${accessToken}`,
+  };
+};
+
 export const getOwnProperties = async ({
   query,
 }: {
@@ -12,47 +24,15 @@ export const getOwnProperties = async ({
 }) => {
   const params = new URLSearchParams();
 
-  if (query?.searchTerm) {
-    params.set("searchTerm", query.searchTerm as string);
-  }
+  Object.entries(query ?? {}).forEach(([key, value]) => {
+    if (typeof value === "string") {
+      params.set(key, value);
+    }
+  });
 
-  if (query?.type) {
-    params.set("type", query.type as string);
-  }
+  const headers = await getAuthCookie();
 
-  if (query?.isAvailable) {
-    params.set("isAvailable", query.isAvailable as string);
-  }
-
-  if (query?.landlordId) {
-    params.set("landlordId", query.landlordId as string);
-  }
-
-  if (query?.minPrice) {
-    params.set("minPrice", query.minPrice as string);
-  }
-
-  if (query?.maxPrice) {
-    params.set("maxPrice", query.maxPrice as string);
-  }
-  if (query?.page) {
-    params.set("page", query.page as string);
-  }
-  if (query?.limit) {
-    params.set("limit", query.limit as string);
-  }
-  if (query?.city) {
-    params.set("city", query.city as string);
-  }
-  if (query?.categoryId) {
-    params.set("categoryId", query.categoryId as string);
-  }
-  if (query?.sort) {
-    params.set("sort", query.sort as string);
-  }
-  const accessToken = await isAccessTokenExist();
-
-  if (!accessToken) {
+  if (!headers) {
     return {
       success: false,
       statusCode: 403,
@@ -61,12 +41,44 @@ export const getOwnProperties = async ({
   }
 
   const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/landlord/properties`,
+    `${process.env.BACKEND_API_URL}/api/landlord/properties?${params}`,
     {
       cache: "no-store",
-      headers: {
-        Cookie: `accessToken=${accessToken}`,
-      },
+      headers,
+    },
+  );
+
+  return res.json();
+};
+
+export const getLandlordRentalRequests = async ({
+  query,
+}: {
+  query?: Record<string, string | string[] | undefined>;
+}) => {
+  const params = new URLSearchParams();
+
+  Object.entries(query ?? {}).forEach(([key, value]) => {
+    if (typeof value === "string") {
+      params.set(key, value);
+    }
+  });
+
+  const headers = await getAuthCookie();
+
+  if (!headers) {
+    return {
+      success: false,
+      statusCode: 403,
+      message: "User not logged in.",
+    };
+  }
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/landlord/requests?${params}`,
+    {
+      cache: "no-store",
+      headers,
     },
   );
 
@@ -74,12 +86,12 @@ export const getOwnProperties = async ({
 };
 
 export const createProperty = async (
-  prevState: AuthState,
+  _prevState: AuthState,
   formData: FormData,
 ): Promise<AuthState> => {
-  const accessToken = await isAccessTokenExist();
+  const headers = await getAuthCookie();
 
-  if (!accessToken) {
+  if (!headers) {
     return {
       success: false,
       statusCode: 403,
@@ -89,14 +101,21 @@ export const createProperty = async (
 
   const payload = new FormData();
 
-  payload.append("title", formData.get("title") as string);
-  //   payload.append("description", formData.get("description") as string);
-  payload.append("city", formData.get("city") as string);
-  //   payload.append("address", formData.get("address") as string);
-  payload.append("price", formData.get("price") as string);
-  //   payload.append("bedrooms", formData.get("bedrooms") as string);
-  //   payload.append("bathrooms", formData.get("bathrooms") as string);
-  payload.append("area", formData.get("area") as string);
+  [
+    "title",
+    "description",
+    "city",
+    "address",
+    "price",
+    "bedrooms",
+    "bathrooms",
+    "area",
+    "categoryName",
+    "categoryDescription",
+  ].forEach((key) => {
+    const value = formData.get(key);
+    if (value) payload.append(key, value as string);
+  });
 
   payload.append("furnished", String(formData.get("furnished") === "on"));
 
@@ -107,18 +126,9 @@ export const createProperty = async (
     new Date(formData.get("availableFrom") as string).toISOString(),
   );
 
-  payload.append("categoryName", formData.get("categoryName") as string);
-
-  payload.append(
-    "categoryDescription",
-    formData.get("categoryDescription") as string,
-  );
-
-  const images = formData.getAll("images") as File[];
-
-  images.forEach((image) => {
-    if (image.size > 0) {
-      payload.append("images", image);
+  (formData.getAll("images") as File[]).forEach((file) => {
+    if (file.size > 0) {
+      payload.append("images", file);
     }
   });
 
@@ -126,86 +136,7 @@ export const createProperty = async (
     `${process.env.BACKEND_API_URL}/api/landlord/properties`,
     {
       method: "POST",
-      headers: {
-        Cookie: `accessToken=${accessToken}`,
-        // ❌ Do NOT set Content-Type.
-        // fetch will automatically add the correct multipart boundary.
-      },
-      body: payload,
-    },
-  );
-
-  const result = await res.json();
-
-  if (result.success) {
-    revalidateTag("properties", {
-      expire: 0,
-    });
-
-    revalidateTag("filter-options", {
-      expire: 0,
-    });
-  }
-
-  return result;
-};
-export const updateProperty = async (
-  propertyId: string,
-  prevState: AuthState,
-  formData: FormData,
-): Promise<AuthState> => {
-  const accessToken = await isAccessTokenExist();
-
-  if (!accessToken) {
-    return {
-      success: false,
-      statusCode: 403,
-      message: "User not logged in.",
-    };
-  }
-
-  const payload = new FormData();
-
-  payload.append("title", formData.get("title") as string);
-  payload.append("description", formData.get("description") as string);
-  payload.append("city", formData.get("city") as string);
-  payload.append("address", formData.get("address") as string);
-  payload.append("price", formData.get("price") as string);
-  payload.append("bedrooms", formData.get("bedrooms") as string);
-  payload.append("bathrooms", formData.get("bathrooms") as string);
-  payload.append("area", formData.get("area") as string);
-
-  payload.append("furnished", String(formData.get("furnished") === "on"));
-
-  payload.append("available", String(formData.get("available") === "on"));
-
-  payload.append(
-    "availableFrom",
-    new Date(formData.get("availableFrom") as string).toISOString(),
-  );
-
-  payload.append("categoryName", formData.get("categoryName") as string);
-
-  payload.append(
-    "categoryDescription",
-    formData.get("categoryDescription") as string,
-  );
-
-  const images = formData.getAll("images") as File[];
-
-  images.forEach((image) => {
-    if (image.size > 0) {
-      payload.append("images", image);
-    }
-  });
-
-  const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
-    {
-      method: "PATCH",
-      headers: {
-        Cookie: `accessToken=${accessToken}`,
-      },
+      headers,
       body: payload,
     },
   );
@@ -215,7 +146,131 @@ export const updateProperty = async (
   if (result.success) {
     revalidateTag("properties", { expire: 0 });
     revalidateTag("filter-options", { expire: 0 });
+    revalidateTag("landlord-properties", { expire: 0 });
   }
 
   return result;
+};
+
+export const updateRentalRequestStatus = async (
+  rentalRequestId: string,
+  _prevState: AuthState,
+  formData: FormData,
+): Promise<AuthState> => {
+  const headers = await getAuthCookie();
+
+  if (!headers) {
+    return {
+      success: false,
+      statusCode: 403,
+      message: "User not logged in.",
+    };
+  }
+
+  const payload = new FormData();
+  payload.append("status", formData.get("status") as string);
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/landlord/requests/${rentalRequestId}`,
+    {
+      method: "PATCH",
+      headers,
+      body: payload,
+    },
+  );
+
+  const result = await res.json();
+
+  if (result.success) {
+    revalidateTag("landlord-rental-requests", {
+      expire: 0,
+    });
+
+    revalidateTag("properties", {
+      expire: 0,
+    });
+  }
+
+  return result;
+};
+
+export const updateProperty = async (
+  propertyId: string,
+  _prevState: AuthState,
+  formData: FormData,
+): Promise<AuthState> => {
+  const headers = await getAuthCookie();
+
+  if (!headers) {
+    return {
+      success: false,
+      statusCode: 403,
+      message: "User not logged in.",
+    };
+  }
+
+  const payload = new FormData();
+
+  [
+    "title",
+    "description",
+    "city",
+    "address",
+    "price",
+    "bedrooms",
+    "bathrooms",
+    "area",
+    "categoryName",
+    "categoryDescription",
+  ].forEach((key) => {
+    const value = formData.get(key);
+
+    if (value) {
+      payload.append(key, value as string);
+    }
+  });
+
+  payload.append("furnished", String(formData.get("furnished") === "on"));
+
+  payload.append("available", String(formData.get("available") === "on"));
+
+  payload.append(
+    "availableFrom",
+    new Date(formData.get("availableFrom") as string).toISOString(),
+  );
+
+  (formData.getAll("images") as File[]).forEach((image) => {
+    if (image.size > 0) {
+      payload.append("images", image);
+    }
+  });
+
+  try {
+    const res = await fetch(
+      `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
+      {
+        method: "PUT",
+        headers,
+        body: payload,
+      },
+    );
+
+    const result = await res.json();
+
+    if (result.success) {
+      revalidateTag("properties", { expire: 0 });
+      revalidateTag("filter-options", { expire: 0 });
+      revalidateTag("landlord-properties", { expire: 0 });
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Update property failed:", error);
+
+    return {
+      success: false,
+      statusCode: 500,
+      message: "Failed to update property.",
+    };
+  }
 };
