@@ -1,7 +1,8 @@
 
+import { getLandlordOwnProperties } from "../../_actions/landlordActions";
 import PropertyForm from "../../_components/PropertyForm";
 
-import { getOwnProperties } from "../../_actions/landlordActions";
+
 import DashboardPropertyList from "../../_components/PropertyListProps";
 
 const LandlordPropertiesPage = async ({
@@ -11,7 +12,7 @@ const LandlordPropertiesPage = async ({
 }) => {
     const query = await searchParams;
 
-    const result = await getOwnProperties({ query });
+    const result = await getLandlordOwnProperties({ query });
 
     return (
         <section className="space-y-6">

@@ -19,6 +19,7 @@ import { createProperty, updateProperty } from "../_actions/landlordActions";
 interface Props {
     mode: "create" | "edit";
     property?: Property;
+    onSuccess?: () => void;
 }
 
 export default function PropertyForm({
@@ -155,7 +156,7 @@ export default function PropertyForm({
                 </DialogHeader>
                 <form
                     action={formAction}
-                    //  encType="multipart/form-data"
+                    encType="multipart/form-data"
                     className="max-h-[calc(90vh-90px)] overflow-y-auto px-8 py-6"
                 >
                     {/* Property Details */}

@@ -1,276 +1,218 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { revalidateTag } from "next/cache";
-
 import { AuthState } from "@/lib/types";
-import { isAccessTokenExist } from "@/service/refreshToken";
+import { cookies } from "next/headers";
 
-const getAuthCookie = async () => {
-  const accessToken = await isAccessTokenExist();
-
-  if (!accessToken) {
-    return null;
-  }
+const getAuthHeaders = async () => {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
 
   return {
-    Cookie: `accessToken=${accessToken}`,
+    Authorization: `Bearer ${accessToken}`,
   };
 };
 
-export const getOwnProperties = async ({
-  query,
-}: {
-  query?: Record<string, string | string[] | undefined>;
-}) => {
+const buildSearchParams = (
+  query?: Record<string, string | string[] | undefined>,
+) => {
   const params = new URLSearchParams();
 
-  Object.entries(query ?? {}).forEach(([key, value]) => {
-    if (typeof value === "string") {
+  if (!query) return params;
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (!value) return;
+
+    if (Array.isArray(value)) {
+      value.forEach((v) => params.append(key, v));
+    } else {
       params.set(key, value);
     }
   });
 
-  const headers = await getAuthCookie();
+  return params;
+};
 
-  if (!headers) {
-    return {
-      success: false,
-      statusCode: 403,
-      message: "User not logged in.",
-    };
-  }
+// Get landlord's own properties
+export const getLandlordOwnProperties = async ({
+  query,
+}: {
+  query?: Record<string, string | string[] | undefined>;
+}) => {
+  const params = buildSearchParams(query);
+  const headers = await getAuthHeaders();
 
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/landlord/properties?${params}`,
     {
-      cache: "no-store",
       headers,
+      cache: "no-store",
     },
   );
 
   return res.json();
 };
 
+// Get rental requests for landlord's properties
 export const getLandlordRentalRequests = async ({
   query,
 }: {
   query?: Record<string, string | string[] | undefined>;
 }) => {
-  const params = new URLSearchParams();
-
-  Object.entries(query ?? {}).forEach(([key, value]) => {
-    if (typeof value === "string") {
-      params.set(key, value);
-    }
-  });
-
-  const headers = await getAuthCookie();
-
-  if (!headers) {
-    return {
-      success: false,
-      statusCode: 403,
-      message: "User not logged in.",
-    };
-  }
+  const params = buildSearchParams(query);
+  const headers = await getAuthHeaders();
 
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/landlord/requests?${params}`,
     {
-      cache: "no-store",
       headers,
+      cache: "no-store",
     },
   );
 
   return res.json();
 };
 
-export const createProperty = async (
-  _prevState: AuthState,
-  formData: FormData,
-): Promise<AuthState> => {
-  const headers = await getAuthCookie();
-
-  if (!headers) {
-    return {
-      success: false,
-      statusCode: 403,
-      message: "User not logged in.",
-    };
-  }
-
-  const payload = new FormData();
-
-  [
-    "title",
-    "description",
-    "city",
-    "address",
-    "price",
-    "bedrooms",
-    "bathrooms",
-    "area",
-    "categoryName",
-    "categoryDescription",
-  ].forEach((key) => {
-    const value = formData.get(key);
-    if (value) payload.append(key, value as string);
-  });
-
-  payload.append("furnished", String(formData.get("furnished") === "on"));
-
-  payload.append("available", String(formData.get("available") === "on"));
-
-  payload.append(
-    "availableFrom",
-    new Date(formData.get("availableFrom") as string).toISOString(),
-  );
-
-  (formData.getAll("images") as File[]).forEach((file) => {
-    if (file.size > 0) {
-      payload.append("images", file);
-    }
-  });
-
-  const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/landlord/properties`,
-    {
-      method: "POST",
-      headers,
-      body: payload,
-    },
-  );
-
-  const result = await res.json();
-
-  if (result.success) {
-    revalidateTag("properties", { expire: 0 });
-    revalidateTag("filter-options", { expire: 0 });
-    revalidateTag("landlord-properties", { expire: 0 });
-  }
-
-  return result;
-};
-
+// Approve or reject a rental request
 export const updateRentalRequestStatus = async (
+  prevState: AuthState,
   rentalRequestId: string,
-  _prevState: AuthState,
-  formData: FormData,
+  status: "APPROVED" | "REJECTED",
 ): Promise<AuthState> => {
-  const headers = await getAuthCookie();
-
-  if (!headers) {
-    return {
-      success: false,
-      statusCode: 403,
-      message: "User not logged in.",
-    };
-  }
-
-  const payload = new FormData();
-  payload.append("status", formData.get("status") as string);
+  const headers = await getAuthHeaders();
 
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/landlord/requests/${rentalRequestId}`,
     {
       method: "PATCH",
-      headers,
-      body: payload,
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
     },
   );
 
-  const result = await res.json();
-
-  if (result.success) {
-    revalidateTag("landlord-rental-requests", {
-      expire: 0,
-    });
-
-    revalidateTag("properties", {
-      expire: 0,
-    });
-  }
-
-  return result;
+  return res.json();
 };
 
-export const updateProperty = async (
-  propertyId: string,
-  _prevState: AuthState,
+// Create a new property
+export const createProperty = async (
+  prevState: AuthState,
   formData: FormData,
 ): Promise<AuthState> => {
-  const headers = await getAuthCookie();
+  const headers = await getAuthHeaders();
+  // Remove Content-Type header to let browser set it with boundary for multipart
+  const headersWithoutContentType = { ...headers };
+  // delete headersWithoutContentType["Content-Type"];
 
-  if (!headers) {
-    return {
-      success: false,
-      statusCode: 403,
-      message: "User not logged in.",
-    };
-  }
-
-  const payload = new FormData();
-
-  [
-    "title",
-    "description",
-    "city",
-    "address",
-    "price",
-    "bedrooms",
-    "bathrooms",
-    "area",
-    "categoryName",
-    "categoryDescription",
-  ].forEach((key) => {
-    const value = formData.get(key);
-
-    if (value) {
-      payload.append(key, value as string);
-    }
+  const res = await fetch(`${process.env.BACKEND_API_URL}/api/landlord/properties`, {
+    method: "POST",
+    headers: headersWithoutContentType,
+    body: formData,
   });
 
-  payload.append("furnished", String(formData.get("furnished") === "on"));
+  return res.json();
+};
 
-  payload.append("available", String(formData.get("available") === "on"));
+// Update a property
+export const updateProperty = async (
+  propertyId: string,
+  payload: Record<string, any>,
+): Promise<AuthState> => {
+  const headers = await getAuthHeaders();
 
-  payload.append(
-    "availableFrom",
-    new Date(formData.get("availableFrom") as string).toISOString(),
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
+    {
+      method: "PUT",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
   );
 
-  (formData.getAll("images") as File[]).forEach((image) => {
-    if (image.size > 0) {
-      payload.append("images", image);
-    }
-  });
+  return res.json();
+};
+
+// Delete a property
+export const deleteProperty = async (propertyId: string) => {
+  const headers = await getAuthHeaders();
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
+    {
+      method: "DELETE",
+      headers,
+      cache: "no-store",
+    },
+  );
+
+  return res.json();
+};
+
+// Get property by ID
+export const getPropertyById = async (id: string) => {
+  const headers = await getAuthHeaders();
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/properties/${id}`,
+    {
+      headers,
+      cache: "no-store",
+    },
+  );
+
+  return res.json();
+};
+
+// Get landlord dashboard statistics
+export const getLandlordDashboardStats = async () => {
+  const headers = await getAuthHeaders();
 
   try {
-    const res = await fetch(
-      `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
-      {
-        method: "PUT",
+    // Fetch properties and rental requests in parallel
+    const [properties, rentals] = await Promise.all([
+      fetch(`${process.env.BACKEND_API_URL}/api/landlord/properties?page=1&limit=1`, {
         headers,
-        body: payload,
-      },
-    );
-
-    const result = await res.json();
-
-    if (result.success) {
-      revalidateTag("properties", { expire: 0 });
-      revalidateTag("filter-options", { expire: 0 });
-      revalidateTag("landlord-properties", { expire: 0 });
-    }
-
-    return result;
-  } catch (error) {
-    console.error("Update property failed:", error);
+        cache: "no-store",
+      }).then((r) => r.json()),
+      fetch(`${process.env.BACKEND_API_URL}/api/landlord/requests?page=1&limit=1`, {
+        headers,
+        cache: "no-store",
+      }).then((r) => r.json()),
+    ]);
 
     return {
+      success: true,
+      data: {
+        totalProperties: properties?.data?.meta?.total || 0,
+        totalRentalRequests: rentals?.data?.meta?.total || 0,
+        activeListings: 0, // Can be calculated if needed
+        totalRevenue: 0, // Can be calculated from payments if needed
+      },
+    };
+  } catch (error) {
+    return {
       success: false,
-      statusCode: 500,
-      message: "Failed to update property.",
+      error: "Failed to fetch dashboard statistics",
     };
   }
+};
+
+// Get rental request details
+export const getRentalRequestDetails = async (rentalRequestId: string) => {
+  const headers = await getAuthHeaders();
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/rentals/${rentalRequestId}`,
+    {
+      headers,
+      cache: "no-store",
+    },
+  );
+
+  return res.json();
 };

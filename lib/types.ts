@@ -51,29 +51,80 @@ export interface IUser {
 export type NavbarProps = {
   user: IUser;
 };
-
-export type Property = {
+export interface PropertyImage {
   id: string;
+  url: string;
+  isPrimary: boolean;
+}
+
+export interface PropertyCategory {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface PropertyLandlord {
+  id: string;
+  name: string;
+  email?: string;
+}
+
+export interface Property {
+  id: string;
+
   title: string;
+  description: string;
+
   city: string;
+  address: string;
+
   price: number;
+  area: number;
+
+  bedrooms: number;
+  bathrooms: number;
+
+  furnished: boolean;
+  available: boolean;
   isAvailable: boolean;
+
+  availableFrom: string;
+
   averageRating: number;
   totalReviews: number;
-  category: {
-    name: string;
-    description: string;
-  };
-  images: [];
-  area: number;
-  furnished: boolean;
-  availableFrom: string;
-  landlord: {
-    name: string;
-  };
+
+  category: PropertyCategory;
+
+  images: PropertyImage[];
+
+  landlord: PropertyLandlord;
+
   createdAt: string;
   updatedAt: string;
-};
+}
+
+// export type Property = {
+//   id: string;
+//   title: string;
+//   city: string;
+//   price: number;
+//   isAvailable: boolean;
+//   averageRating: number;
+//   totalReviews: number;
+//   category: {
+//     name: string;
+//     description: string;
+//   };
+//   images: [];
+//   area: number;
+//   furnished: boolean;
+//   availableFrom: string;
+//   landlord: {
+//     name: string;
+//   };
+//   createdAt: string;
+//   updatedAt: string;
+// };
 
 export type ISidebarItem = {
   label: string;
@@ -82,3 +133,22 @@ export type ISidebarItem = {
     Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
   >;
 };
+export interface RentalRequest {
+  id: string;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "ACTIVE";
+
+  moveInDate: string;
+
+  property: {
+    id: string;
+    title: string;
+  };
+
+  tenant: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export type IStats<T extends string = string> = Record<T, number>;
