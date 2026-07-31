@@ -2,6 +2,7 @@
 "use server";
 
 import { AuthState } from "@/lib/types";
+import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 const getAuthHeaders = async () => {
@@ -66,7 +67,10 @@ export const getLandlordRentalRequests = async ({
     `${process.env.BACKEND_API_URL}/api/landlord/requests?${params}`,
     {
       headers,
-      cache: "no-store",
+      next: {
+        tags: ["landlord-rental-requests"],
+      },
+      cache: "no-cache",
     },
   );
 
@@ -74,11 +78,11 @@ export const getLandlordRentalRequests = async ({
 };
 
 // Approve or reject a rental request
-export const updateRentalRequestStatus = async (
-  prevState: AuthState,
+export async function updateRentalRequestStatus(
   rentalRequestId: string,
   status: "APPROVED" | "REJECTED",
-): Promise<AuthState> => {
+  prevState: AuthState,
+): Promise<AuthState> {
   const headers = await getAuthHeaders();
 
   const res = await fetch(
@@ -92,9 +96,14 @@ export const updateRentalRequestStatus = async (
       body: JSON.stringify({ status }),
     },
   );
+  const result = await res.json();
 
-  return res.json();
-};
+  if (result.success) {
+    revalidateTag("landlord-rental-requests", "max");
+  }
+
+  return result;
+}
 
 // Create a new property
 export const createProperty = async (
@@ -106,11 +115,14 @@ export const createProperty = async (
   const headersWithoutContentType = { ...headers };
   // delete headersWithoutContentType["Content-Type"];
 
-  const res = await fetch(`${process.env.BACKEND_API_URL}/api/landlord/properties`, {
-    method: "POST",
-    headers: headersWithoutContentType,
-    body: formData,
-  });
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/landlord/properties`,
+    {
+      method: "POST",
+      headers: headersWithoutContentType,
+      body: formData,
+    },
+  );
 
   return res.json();
 };
@@ -175,14 +187,20 @@ export const getLandlordDashboardStats = async () => {
   try {
     // Fetch properties and rental requests in parallel
     const [properties, rentals] = await Promise.all([
-      fetch(`${process.env.BACKEND_API_URL}/api/landlord/properties?page=1&limit=1`, {
-        headers,
-        cache: "no-store",
-      }).then((r) => r.json()),
-      fetch(`${process.env.BACKEND_API_URL}/api/landlord/requests?page=1&limit=1`, {
-        headers,
-        cache: "no-store",
-      }).then((r) => r.json()),
+      fetch(
+        `${process.env.BACKEND_API_URL}/api/landlord/properties?page=1&limit=1`,
+        {
+          headers,
+          cache: "no-store",
+        },
+      ).then((r) => r.json()),
+      fetch(
+        `${process.env.BACKEND_API_URL}/api/landlord/requests?page=1&limit=1`,
+        {
+          headers,
+          cache: "no-store",
+        },
+      ).then((r) => r.json()),
     ]);
 
     return {
