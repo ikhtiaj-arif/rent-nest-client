@@ -138,3 +138,31 @@ export const createPaymentAction = async (
 
   return res.json();
 };
+
+export async function createReview(
+  prevState: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const headers = await getAuthHeaders();
+
+  const payload = {
+    rating: Number(formData.get("rating")),
+    comment: formData.get("comment"),
+    propertyId: formData.get("propertyId"),
+    rentalRequestId: formData.get("rentalRequestId"),
+  };
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/reviews`,
+    {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  return res.json();
+}

@@ -2,6 +2,7 @@ import { getRentalRequestById } from '@/app/(dashboardGroup)/_actions/tenantActi
 import { LandlordCard } from '@/app/(dashboardGroup)/_components/_tenant/LandlordCard';
 import PayNowButton from '@/app/(dashboardGroup)/_components/_tenant/PayNowButton';
 import { PropertyCard } from '@/app/(dashboardGroup)/_components/_tenant/PropertyCard';
+import ReviewForm from '@/app/(dashboardGroup)/_components/_tenant/ReviewForm';
 import { StatusTimeline } from '@/app/(dashboardGroup)/_components/_tenant/StatusTimeline';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -168,8 +169,14 @@ export default async function RentalRequestDetailPage({
                                 <CardTitle className="text-lg">Actions</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
-                                {rental.status === 'APPROVED' && (
-                                   <PayNowButton   rentalRequestId={rental.id}/>
+                                {rental.status === 'APPROVED' && rental.payment.status !== "COMPLETED" && (
+                                    <PayNowButton rentalRequestId={rental.id} />
+                                )}
+                                {rental.payment.status === "COMPLETED" && (
+                                    <ReviewForm
+                                        propertyId={rental.property.id}
+                                        rentalRequestId={rental.id}
+                                    />
                                 )}
                                 <Button variant="outline" className="w-full gap-2">
                                     <MessageSquare className="w-4 h-4" />
