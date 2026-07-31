@@ -1,61 +1,93 @@
-'use client';
+"use client";
 
-import { CheckCircle, Clock } from 'lucide-react';
+import {
+    CheckCircle2,
+    Clock3,
+    XCircle,
+} from "lucide-react";
 
-interface TimelineStep {
-    status: string;
-    label: string;
-    completed: boolean;
-    current?: boolean;
+interface Props {
+    status: "PENDING" | "APPROVED" | "REJECTED";
 }
 
-interface StatusTimelineProps {
-    steps: TimelineStep[];
-}
-
-export function StatusTimeline({ steps }: StatusTimelineProps) {
-    const getIcon = (step: TimelineStep) => {
-        if (step.completed) {
-            return <CheckCircle className="w-5 h-5 text-emerald-500" />;
-        }
-        if (step.current) {
-            return <Clock className="w-5 h-5 text-blue-500 animate-spin" />;
-        }
-        return <Circle className="w-5 h-5 text-muted-foreground" />;
-    };
+export function StatusTimeline({
+    status,
+}: Props) {
 
     return (
-        <div className="space-y-4">
-            {steps.map((step, index) => (
-                <div key={step.status} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                        <div className={`p-2 rounded-full ${step.completed ? 'bg-emerald-100 dark:bg-emerald-950' :
-                                step.current ? 'bg-blue-100 dark:bg-blue-950' :
-                                    'bg-muted'
-                            }`}>
-                            {getIcon(step)}
-                        </div>
-                        {index < steps.length - 1 && (
-                            <div className={`w-1 h-12 mt-2 ${step.completed ? 'bg-emerald-200 dark:bg-emerald-800' : 'bg-muted-foreground/20'
-                                }`} />
-                        )}
-                    </div>
-                    <div className="pt-2 pb-4">
-                        <p className={`font-semibold ${step.completed ? 'text-emerald-700 dark:text-emerald-300' :
-                                step.current ? 'text-blue-700 dark:text-blue-300' :
-                                    'text-muted-foreground'
-                            }`}>
-                            {step.label}
-                        </p>
-                    </div>
-                </div>
-            ))}
+        <div className="space-y-6">
+
+            <TimelineItem
+                label="Request Submitted"
+                active
+                completed
+            />
+
+            <TimelineItem
+                label="Landlord Review"
+                active={status === "PENDING"}
+                completed={
+                    status === "APPROVED" ||
+                    status === "REJECTED"
+                }
+            />
+
+            <TimelineItem
+                label={
+                    status === "REJECTED"
+                        ? "Rejected"
+                        : "Approved"
+                }
+                active={status !== "PENDING"}
+                completed={status === "APPROVED"}
+                rejected={status === "REJECTED"}
+                last
+            />
+
         </div>
     );
 }
 
-function Circle({ className }: { className?: string }) {
+function TimelineItem({
+    label,
+    active,
+    completed,
+    rejected,
+    last,
+}: {
+    label: string;
+    active?: boolean;
+    completed?: boolean;
+    rejected?: boolean;
+    last?: boolean;
+}) {
     return (
-        <div className={`w-5 h-5 border-2 border-current rounded-full ${className}`} />
+        <div className="flex gap-4">
+
+            <div className="flex flex-col items-center">
+
+                {completed ? (
+                    <CheckCircle2 className="text-green-500 h-6 w-6" />
+                ) : rejected ? (
+                    <XCircle className="text-red-500 h-6 w-6" />
+                ) : active ? (
+                    <Clock3 className="text-blue-500 h-6 w-6" />
+                ) : (
+                    <div className="h-6 w-6 rounded-full border-2" />
+                )}
+
+                {!last && (
+                    <div className="w-px flex-1 bg-border mt-2" />
+                )}
+
+            </div>
+
+            <div className="pt-1">
+                <p className="font-medium">
+                    {label}
+                </p>
+            </div>
+
+        </div>
     );
 }

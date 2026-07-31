@@ -1,101 +1,78 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Home, Bed, Bath, Zap } from 'lucide-react';
-
-interface PropertyDetails {
-  title: string;
-  city: string;
-  category?: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  price: number;
-  currency?: string;
-  amenities?: string[];
-  image?: string;
-}
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bed, Bath, MapPin, Maximize2 } from "lucide-react";
 
 interface PropertyCardProps {
-  property: PropertyDetails;
+  property: {
+    title: string;
+    city: string;
+    price: number;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
+    area?: number | null;
+    furnished?: boolean;
+    isAvailable?: boolean;
+    category?: {
+      name: string;
+    };
+  };
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const currencySymbol = property.currency === 'BDT' ? '৳' : property.currency || '$';
-
   return (
-    <Card className="h-full overflow-hidden">
-      {property.image && (
-        <div className="w-full h-40 bg-muted overflow-hidden">
-          <img
-            src={property.image}
-            alt={property.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-      <CardHeader className="pb-4">
-        <div className="space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-xl line-clamp-2">{property.title}</CardTitle>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                <MapPin className="w-4 h-4 flex-shrink-0" />
-                <span>{property.city}</span>
-              </div>
+    <Card>
+      <CardHeader className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>{property.title}</CardTitle>
+
+            <div className="flex items-center gap-1 mt-2 text-muted-foreground text-sm">
+              <MapPin className="h-4 w-4" />
+              {property.city}
             </div>
-            {property.category && (
-              <Badge variant="secondary" className="flex-shrink-0">
-                {property.category}
-              </Badge>
-            )}
           </div>
+
+          {property.category && (
+            <Badge>{property.category.name}</Badge>
+          )}
+        </div>
+
+        <div className="text-3xl font-bold">
+          ৳ {property.price.toLocaleString()}
+          <span className="text-base text-muted-foreground font-normal">
+            /month
+          </span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="text-3xl font-bold text-foreground">
-          {currencySymbol} {property.price.toLocaleString()}
-          <span className="text-base font-normal text-muted-foreground">/month</span>
+
+      <CardContent className="grid grid-cols-2 gap-4">
+
+        <div className="flex items-center gap-2">
+          <Bed className="w-4 h-4" />
+          {property.bedrooms ?? "--"} Beds
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          {property.bedrooms !== undefined && (
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-muted">
-              <Bed className="w-4 h-4 text-primary" />
-              <span className="text-sm">
-                <span className="font-semibold text-foreground">{property.bedrooms}</span>
-                <span className="text-muted-foreground"> Beds</span>
-              </span>
-            </div>
-          )}
-          {property.bathrooms !== undefined && (
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-muted">
-              <Bath className="w-4 h-4 text-primary" />
-              <span className="text-sm">
-                <span className="font-semibold text-foreground">{property.bathrooms}</span>
-                <span className="text-muted-foreground"> Baths</span>
-              </span>
-            </div>
-          )}
+        <div className="flex items-center gap-2">
+          <Bath className="w-4 h-4" />
+          {property.bathrooms ?? "--"} Baths
         </div>
 
-        {property.amenities && property.amenities.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold">Amenities</h4>
-            <div className="flex flex-wrap gap-2">
-              {property.amenities.slice(0, 4).map((amenity) => (
-                <Badge key={amenity} variant="outline" className="text-xs">
-                  <Zap className="w-3 h-3 mr-1" />
-                  {amenity}
-                </Badge>
-              ))}
-              {property.amenities.length > 4 && (
-                <Badge variant="outline" className="text-xs">
-                  +{property.amenities.length - 4} more
-                </Badge>
-              )}
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Maximize2 className="w-4 h-4" />
+          {property.area ?? "--"} sqft
+        </div>
+
+        <Badge
+          variant={property.isAvailable ? "default" : "secondary"}
+          className="w-fit"
+        >
+          {property.isAvailable ? "Available" : "Unavailable"}
+        </Badge>
+
+        {property.furnished && (
+          <Badge variant="outline">Furnished</Badge>
         )}
       </CardContent>
     </Card>

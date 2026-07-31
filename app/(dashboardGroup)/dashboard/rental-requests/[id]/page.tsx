@@ -1,5 +1,6 @@
 import { getRentalRequestById } from '@/app/(dashboardGroup)/_actions/tenantActions';
 import { LandlordCard } from '@/app/(dashboardGroup)/_components/_tenant/LandlordCard';
+import PayNowButton from '@/app/(dashboardGroup)/_components/_tenant/PayNowButton';
 import { PropertyCard } from '@/app/(dashboardGroup)/_components/_tenant/PropertyCard';
 import { StatusTimeline } from '@/app/(dashboardGroup)/_components/_tenant/StatusTimeline';
 import { Badge } from '@/components/ui/badge';
@@ -139,7 +140,9 @@ export default async function RentalRequestDetailPage({
                                 <CardTitle className="text-lg">Lease Timeline</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <StatusTimeline steps={getTimelineSteps()} />
+                                <StatusTimeline
+                                    status={rental?.status} />
+                                {/* steps={getTimelineSteps()} /> */}
                             </CardContent>
                         </Card>
 
@@ -152,7 +155,7 @@ export default async function RentalRequestDetailPage({
                                 price: rental.property.price,
                                 bedrooms: rental.property.bedrooms,
                                 bathrooms: rental.property.bathrooms,
-                                amenities: rental.property.amenities,
+                                // amenities: rental.property.amenities,
                             }} />
                         )}
                     </div>
@@ -166,10 +169,7 @@ export default async function RentalRequestDetailPage({
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {rental.status === 'APPROVED' && (
-                                    <Button className="w-full gap-2" size="lg">
-                                        <DollarSign className="w-4 h-4" />
-                                        Pay Now
-                                    </Button>
+                                   <PayNowButton   rentalRequestId={rental.id}/>
                                 )}
                                 <Button variant="outline" className="w-full gap-2">
                                     <MessageSquare className="w-4 h-4" />
@@ -197,8 +197,8 @@ export default async function RentalRequestDetailPage({
                                 name: rental.landlord.name,
                                 email: rental.landlord.email,
                                 phone: rental.landlord.phone,
-                                averageRating: rental.landlord.averageRating,
-                                totalReviews: rental.landlord.totalReviews,
+                                // averageRating: rental.landlord.averageRating,
+                                // totalReviews: rental.landlord.totalReviews,
                             }} />
                         )}
 

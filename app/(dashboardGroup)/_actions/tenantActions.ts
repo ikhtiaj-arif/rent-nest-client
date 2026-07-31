@@ -115,3 +115,26 @@ export const createRentalRequestAction = async (
 
   return await res.json();
 };
+
+
+export const createPaymentAction = async (
+  rentalRequestId: string,
+) => {
+  const headers = await getAuthHeaders();
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/payments/create`,
+    {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        rentalRequestId,
+      }),
+    }
+  );
+
+  return res.json();
+};
