@@ -1,9 +1,9 @@
 import { getRentalRequestById } from '@/app/(dashboardGroup)/_actions/tenantActions';
 import { LandlordCard } from '@/app/(dashboardGroup)/_components/_tenant/LandlordCard';
 import PayNowButton from '@/app/(dashboardGroup)/_components/_tenant/PayNowButton';
-import { PropertyCard } from '@/app/(dashboardGroup)/_components/_tenant/PropertyCard';
 import ReviewForm from '@/app/(dashboardGroup)/_components/_tenant/ReviewForm';
 import { StatusTimeline } from '@/app/(dashboardGroup)/_components/_tenant/StatusTimeline';
+import PropertiesCard from '@/app/(publicGroup)/_components/PropertiesCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -149,15 +149,7 @@ export default async function RentalRequestDetailPage({
 
                         {/* Property Details */}
                         {rental.property && (
-                            <PropertyCard property={{
-                                title: rental.property.title,
-                                city: rental.property.city,
-                                category: rental.property.category,
-                                price: rental.property.price,
-                                bedrooms: rental.property.bedrooms,
-                                bathrooms: rental.property.bathrooms,
-                                // amenities: rental.property.amenities,
-                            }} />
+                            <PropertiesCard property={rental.property} />
                         )}
                     </div>
 
