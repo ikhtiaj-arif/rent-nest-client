@@ -46,7 +46,7 @@ export default function PropertyForm({
     >([]);
 
     useEffect(() => {
-        if (!state) return;
+        if (!state || (state.statusCode === 0 && state.message === "")) return;
 
         if (state.success) {
             toast.success(

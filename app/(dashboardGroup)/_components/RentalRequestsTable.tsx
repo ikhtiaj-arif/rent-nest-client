@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { updateRentalRequestStatus } from "../_actions/landlordActions";
 import { AuthState } from "@/lib/types";
+import { updateRentalRequestStatus } from "../_actions/landlordActions";
 
 export interface RentalRequest {
   id: string;
@@ -39,17 +39,18 @@ function UpdateButton({
 }) {
   const action = updateRentalRequestStatus.bind(null, id, status);
 
- const [state, formAction, pending] = useActionState(
-  action,
-  initialAuthState
-);
+  const [state, formAction, pending] = useActionState(
+    action,
+    initialAuthState
+  );
 
   useEffect(() => {
-    if (!state) return;
+    // Only show toast if state has been updated from action (not initial state)
+    if (!state || (state.statusCode === 0 && state.message === "")) return;
 
     if (state.success) {
-      toast.success(state.message);
-    } else {
+      toast.success(state.message || "Updated successfully");
+    } else if (state.message) {
       toast.error(state.message);
     }
   }, [state]);
@@ -126,8 +127,8 @@ export default function RentalRequestsTable({
                     request.status === "APPROVED"
                       ? "default"
                       : request.status === "REJECTED"
-                      ? "destructive"
-                      : "secondary"
+                        ? "destructive"
+                        : "secondary"
                   }
                 >
                   {request.status}
