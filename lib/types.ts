@@ -73,32 +73,53 @@ export interface Property {
   id: string;
 
   title: string;
-  description: string;
+  description: string | null;
 
   city: string;
-  address: string;
+  address: string | null;
 
   price: number;
-  area: number;
+  area: number | null;
 
-  bedrooms: number;
-  bathrooms: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
 
   furnished: boolean;
-  available: boolean;
-  isAvailable: boolean;
 
-  availableFrom: string;
+  isAvailable: boolean;
+  availableFrom: string | null;
+
+  landlordId: string;
+  categoryId: string;
 
   averageRating: number;
   totalReviews: number;
 
   category: PropertyCategory;
+  landlord: PropertyLandlord;
 
   images: PropertyImage[];
 
-  landlord: PropertyLandlord;
+  reviews?: [];
+  rentalRequests?: RentalRequest[];
 
+  _count?: {
+    rentalRequests: number;
+    reviews: number;
+  };
+
+  createdAt: string;
+  updatedAt: string;
+}
+export interface PropertyImage {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+}
+export interface PropertyCategory {
+  id: string;
+  name: string;
+  description: string;
   createdAt: string;
   updatedAt: string;
 }

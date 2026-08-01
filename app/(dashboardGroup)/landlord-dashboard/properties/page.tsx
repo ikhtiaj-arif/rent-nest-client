@@ -1,9 +1,10 @@
 
+import { getMe } from "@/service/getMe";
 import { getLandlordOwnProperties } from "../../_actions/landlordActions";
+import PropertiesTable from "../../_components/PropertiesTable";
 import PropertyForm from "../../_components/PropertyForm";
 
 
-import DashboardPropertyList from "../../_components/PropertyListProps";
 
 const LandlordPropertiesPage = async ({
     searchParams,
@@ -12,7 +13,12 @@ const LandlordPropertiesPage = async ({
 }) => {
     const query = await searchParams;
 
+    const user = await getMe();
     const result = await getLandlordOwnProperties({ query });
+    const properties = result?.data?.data || [];
+    const meta = result?.data?.meta;
+    const userId = user?.data?.profile?.id;
+    
 
     return (
         <section className="space-y-6">
@@ -31,9 +37,10 @@ const LandlordPropertiesPage = async ({
                 <PropertyForm mode="create" />
             </div>
 
-            <DashboardPropertyList
-                properties={result?.data?.data}
-                meta={result?.data.meta}
+            <PropertiesTable
+                properties={properties}
+                meta={meta}
+                currentUserId={userId}
             />
 
         </section>

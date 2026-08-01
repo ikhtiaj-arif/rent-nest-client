@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge, Loader2, PencilIcon, Plus, PlusIcon, UploadCloud } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,7 @@ export default function PropertyForm({
         action,
         initialAuthState
     );
+    const [open, setOpen] = useState(false);
 
     const [images, setImages] = useState<
         {
@@ -50,13 +51,18 @@ export default function PropertyForm({
 
         if (state.success) {
             toast.success(
-                state.message ??
+                state.message ||
                 (mode === "create"
                     ? "Property created successfully."
                     : "Property updated successfully.")
             );
-        } else if (state.message) {
-            toast.error(state.message);
+            startTransition(() => {
+                setOpen(false);
+                setImages([]);
+            });
+
+        } else {
+            toast.error(state.message || "Something went wrong");
         }
     }, [state, mode]);
 
@@ -111,21 +117,10 @@ export default function PropertyForm({
             }))
         );
     };
-    const [open, setOpen] = useState(false);
 
 
 
-    useEffect(() => {
-        if (!state) return;
 
-        if (state.success) {
-            toast.success(state.message || (mode === "edit" ? "Post updated successfully" : "Post created successfully"));
-            // eslint-disable-next-line react-hooks/set-state-in-effect -- closing the dialog is the intended reaction to the server action's result, not a render loop
-            setOpen(false);
-        } else {
-            toast.error(state.message || "Something went wrong");
-        }
-    }, [state, mode]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -144,20 +139,29 @@ export default function PropertyForm({
                     )
                 }
             </DialogTrigger>
-            <DialogContent className="  w-[95vw]
-                                        max-w-6xl
-                                        max-h-[90vh]
-                                        
-                                        p-0">
-                <DialogHeader className="border-b px-8 py-6">
-                    <DialogTitle className="text-2xl">
+            <DialogContent className="
+    w-[95vw]
+    max-w-5xl
+    h-[92vh]
+    p-0
+    overflow-hidden
+    rounded-2xl
+  ">
+                <DialogHeader className="sticky top-0 z-20 border-b bg-background px-8 py-5">
+                    <DialogTitle className="text-2xl font-bold">
                         {mode === "edit" ? "Edit Property" : "Create Property"}
                     </DialogTitle>
                 </DialogHeader>
                 <form
                     action={formAction}
                     encType="multipart/form-data"
-                    className="max-h-[calc(90vh-90px)] overflow-y-auto px-8 py-6"
+                    className="
+        flex-1
+        overflow-y-auto
+        px-8
+        py-6
+        space-y-8
+    "
                 >
                     {/* Property Details */}
 
@@ -265,7 +269,7 @@ export default function PropertyForm({
                                 <Input
                                     name="area"
                                     type="number"
-                                    defaultValue={property?.area}
+                                    defaultValue={property?.area ?? ""}
                                     required
                                 />
                             </div>
@@ -482,12 +486,13 @@ export default function PropertyForm({
 
                     </Card>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-center mt-2 w-full">
 
                         <Button
                             type="submit"
-                            size="lg"
+                            // size="default"
                             disabled={pending}
+                            className="w-full md:w-1/2"
                         >
                             {pending && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
