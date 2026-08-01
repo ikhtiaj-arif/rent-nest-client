@@ -19,7 +19,7 @@ const PublicGroupLayout = async (
                 <div className="absolute -bottom-10 -right-10 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
             </div> */}
             <Navbar user={user} />
-            <div className="container mx-auto">
+            <div className=" ">
                 {children}
 
             </div>
