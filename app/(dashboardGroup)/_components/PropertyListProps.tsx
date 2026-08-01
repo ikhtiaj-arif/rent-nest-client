@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +11,7 @@ import { Building2 } from "lucide-react";
 import { Property } from "@/lib/types";
 
 import PropertyPagination from "@/app/(publicGroup)/_components/PropertyPagination";
+import Image from "next/image";
 import PropertyForm from "./PropertyForm";
 // import DeletePropertyDialog from "./DeletePropertyDialog";
 
@@ -76,15 +79,17 @@ function DashboardPropertyCard({
             <CardContent className="flex gap-6 p-6">
                 {/* Thumbnail */}
                 <div className="flex h-36 w-48 items-center justify-center overflow-hidden rounded-lg bg-muted">
-                    {/* {property.images?.length ? (
-                        <img
+                    {property?.images?.length ? (
+                        <Image
                             src={property.images[0].url}
                             alt={property.title}
-                            className="h-full w-full object-cover"
+                            width={192}
+                            height={144}
+                            className="h-36 w-48 rounded-lg object-cover"
                         />
                     ) : (
                         <Building2 className="h-10 w-10 text-muted-foreground" />
-                    )} */}
+                    )}
                 </div>
 
                 {/* Details */}

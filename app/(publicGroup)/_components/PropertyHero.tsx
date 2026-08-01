@@ -3,7 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/lib/types";
-import { Building2, MapPin, Star } from "lucide-react";
+import { MapPin, Star } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import RentalRequestModal from "./RentalRequestModal";
@@ -20,15 +21,25 @@ export default function PropertyHero({
 }: PropertyHeroProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
-
+    const imageSrc = property?.images?.[0]?.url || '/placeholder-property.png';
+   
     return (
         <>
             <section className="grid gap-8 lg:grid-cols-[2fr_1fr]">
                 {/* Image Placeholder */}
-                <div className="overflow-hidden rounded-2xl border bg-muted">
-                    <div className="flex aspect-video items-center justify-center">
-                        <Building2 className="h-20 w-20 text-muted-foreground/40" />
-                    </div>
+                <div className="relative h-48 w-full bg-muted overflow-hidden">
+                    <Image
+                        src={imageSrc}
+                        alt={property.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={false}
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder-property.png';
+                        }}
+                    />
                 </div>
 
                 {/* Summary */}

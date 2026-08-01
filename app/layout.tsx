@@ -15,9 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="en" className="scroll-smooth"
     >
-      <body className="min-h-full flex flex-col dark">
+      <body className="min-h-screen flex flex-col bg-background text-foreground dark">
         <Toaster
           position="top-right" richColors />
         {children}</body>

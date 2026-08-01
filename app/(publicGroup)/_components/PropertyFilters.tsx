@@ -92,25 +92,29 @@ export default function PropertyFilters({
 
             {/* Desktop — only visible at lg and above */}
 
-            <Card className="sticky top-24 hidden lg:block">
+            {/* MODIFIED: Fixed sticky positioning and width */}
+            <Card className="sticky top-20 hidden lg:block border-border">
 
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-4 border-b border-border">
 
-                    <CardTitle>
-                        Filters
-                    </CardTitle>
-                    <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                    >
-                        <Link href="/properties">
-                            Clear
-                        </Link>
-                    </Button>
+                    <div className="flex items-center justify-between gap-2">
+                        <CardTitle>
+                            Filters
+                        </CardTitle>
+                        <Button
+                            asChild
+                            variant="ghost"
+                            size="sm"
+                        >
+                            <Link href="/properties">
+                                Clear
+                            </Link>
+                        </Button>
+                    </div>
+
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="pt-4">
 
                     <FiltersContent
                         categories={categories}

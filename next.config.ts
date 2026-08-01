@@ -4,9 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   images: {
     remotePatterns: [
-      // {
-      //   hostname: "static.vecteezy.com"
-      // },
+      {
+        hostname: "res.cloudinary.com",
+      },
       // {
       //   hostname: "example.com"
       // }

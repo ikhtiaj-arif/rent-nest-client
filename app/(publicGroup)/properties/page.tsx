@@ -27,96 +27,96 @@ const PropertiesPage = async ({
 
 
 
+    // MODIFIED: Added better padding, spacing, and responsive layout
     return (
-        <section className="container mx-auto px-4 py-8">
-
+        <section className="min-h-screen bg-background">
             {/* Header */}
-
-            <div className="mb-8 space-y-2">
-
-                <h1 className="text-4xl font-bold tracking-tight">
-                    Discover Properties
-                </h1>
-
-                <p className="text-muted-foreground">
-                    Browse rental homes, apartments and premium
-                    properties across Bangladesh.
-                </p>
-
+            <div className="border-b border-border bg-card/50">
+                <div className="container mx-auto px-4 py-8 sm:py-12">
+                    <div className="mb-0 space-y-2">
+                        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+                            Discover Properties
+                        </h1>
+                        <p className="text-muted-foreground text-lg">
+                            Browse rental homes, apartments and premium
+                            properties across Bangladesh.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {/* Search */}
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex flex-col gap-8 lg:gap-12 lg:flex-row">
 
-            <div className="mt-8 flex flex-col gap-8 lg:flex-row">
+                    {/* Filters */}
 
-                {/* Filters */}
+                    <aside className="lg:w-72 shrink-0">
 
-                <aside className="lg:w-72 shrink-0">
+                        <PropertyFilters
+                            categories={categories}
+                            cities={cities}
+                        />
 
-                    <PropertyFilters
-                        categories={categories}
-                        cities={cities}
-                    />
+                    </aside>
 
-                </aside>
+                    {/* Right */}
 
-                {/* Right */}
+                    <main className="flex-1 space-y-6">
 
-                <main className="flex-1 space-y-6">
+                        {/* Top */}
 
-                    {/* Top */}
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="font-medium">
+                                    {meta?.total} Properties Found
+                                </p>
 
-                        <div>
-                            <p className="font-medium">
-                                {meta.total} Properties Found
-                            </p>
-
-                            <p className="text-sm text-muted-foreground">
-                                Showing page {meta.page} of {meta.totalPage}
-                            </p>
-                        </div>
-
-
-                        <SearchBar />
+                                <p className="text-sm text-muted-foreground">
+                                    Showing page {meta?.page} of {meta?.totalPage}
+                                </p>
+                            </div>
 
 
-                    </div>
+                            <SearchBar />
 
-                    {/* Grid */}
-
-                    {properties.length ? (
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-
-                            {properties.map((property: Property) => (
-                                <PropertiesCard
-                                    key={property.id}
-                                    property={property}
-                                />
-                            ))}
 
                         </div>
-                    ) : (
-                        <div className="rounded-xl border p-12 text-center">
 
-                            <h3 className="text-xl font-semibold">
-                                No Properties Found
-                            </h3>
+                        {/* Grid */}
 
-                            <p className="mt-2 text-muted-foreground">
-                                Try changing your search or filters.
-                            </p>
+                        {properties.length ? (
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
 
-                        </div>
-                    )}
+                                {properties.map((property: Property) => (
+                                    <PropertiesCard
+                                        key={property.id}
+                                        property={property}
+                                    />
+                                ))}
 
-                    <PropertyPagination meta={meta} />
+                            </div>
+                        ) : (
+                            <div className="rounded-xl border p-12 text-center">
 
-                </main>
+                                <h3 className="text-xl font-semibold">
+                                    No Properties Found
+                                </h3>
 
+                                <p className="mt-2 text-muted-foreground">
+                                    Try changing your search or filters.
+                                </p>
+
+                            </div>
+                        )}
+
+                        <PropertyPagination meta={meta} />
+
+                    </main>
+
+                </div>
             </div>
-
         </section>
     );
 };

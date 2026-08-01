@@ -8,33 +8,22 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
  
-import { Newspaper } from "lucide-react";
+import { Building2, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
  
 import { ISidebarItem, NavbarProps } from "@/lib/types";
 import { sidebarMenuItems } from "../_config/SidebarMenuItems";
+import { logout } from "@/service/logout";
+import { Button } from "@/components/ui/button";
 
-// const navItems = [
-//   {
-//     label: "My Posts",
-//     href: "/dashboard/my-posts",
-//     icon: Podcast,
-//   },
-//   {
-//     label: "My Profile",
-//     href: "/dashboard/my-profile",
-//     icon: Podcast,
-//   },
-// ];
-
+// MODIFIED: Added responsiveness, header, and logout functionality
 export default function DashboardSidebar({user} : NavbarProps) {
   const pathname = usePathname();
-
-  // const navItems = sidebarMenuItems.USER;
 
   let navItems : ISidebarItem[]  = [];
 
@@ -48,22 +37,24 @@ export default function DashboardSidebar({user} : NavbarProps) {
 
   return (
     <Sidebar
-      collapsible="none"
-      className=" h-[calc(100svh-0rem)] border-r border-sidebar-border"
+      collapsible="icon"
+      className="hidden md:flex h-[calc(100svh-3.5rem)] border-r border-sidebar-border"
     >
-      {/* <SidebarHeader>
+      <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-            <Newspaper className="h-4 w-4" />
+            <Building2 className="h-4 w-4" />
           </div>
-          <div className="flex flex-col leading-tight">
-           
-            <span className="text-xs text-sidebar-foreground/70">
-              Dashboard
+          <div className="flex flex-col leading-tight min-w-0">
+            <span className="text-sm font-semibold text-sidebar-foreground truncate">
+              RentNest
+            </span>
+            <span className="text-xs text-sidebar-foreground/70 truncate">
+              {user.data.profile.role}
             </span>
           </div>
         </div>
-      </SidebarHeader> */}
+      </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
@@ -74,9 +65,10 @@ export default function DashboardSidebar({user} : NavbarProps) {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.href}
+                    className="text-sidebar-foreground hover:bg-sidebar-accent"
                   >
                     <Link href={item.href}>
-                      <item.icon />
+                      <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -86,6 +78,20 @@ export default function DashboardSidebar({user} : NavbarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Footer with Logout */}
+      <div className="p-4 border-t border-sidebar-border">
+        <form action={logout}>
+          <Button 
+            type="submit" 
+            variant="outline" 
+            className="w-full justify-start gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </Button>
+        </form>
+      </div>
     </Sidebar>
   );
 }

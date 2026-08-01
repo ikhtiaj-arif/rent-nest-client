@@ -1,80 +1,82 @@
-"use client";
+'use client'
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bed, Bath, MapPin, Maximize2 } from "lucide-react";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Property } from '@/lib/types';
+import { Star } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
-interface PropertyCardProps {
-  property: {
-    title: string;
-    city: string;
-    price: number;
-    bedrooms?: number | null;
-    bathrooms?: number | null;
-    area?: number | null;
-    furnished?: boolean;
-    isAvailable?: boolean;
-    category?: {
-      name: string;
-    };
-  };
-}
+// MODIFIED: Added Next.js Image optimization and improved layout
+const PropertiesCard = ({ property }: { property: Property }) => {
 
-export function PropertyCard({ property }: PropertyCardProps) {
+  const imageSrc = property.images?.[0]?.url || '/placeholder-property.png';
+
   return (
-    <Card>
-      <CardHeader className="space-y-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle>{property.title}</CardTitle>
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow border border-border">
+      {/* Image Container */}
+      <div className="relative h-48 w-full bg-muted overflow-hidden">
+        <Image
+          src={imageSrc}
+          alt={property.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={false}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder-property.png';
+          }}
+        />
+      </div>
 
-            <div className="flex items-center gap-1 mt-2 text-muted-foreground text-sm">
-              <MapPin className="h-4 w-4" />
-              {property.city}
-            </div>
-          </div>
-
-          {property.category && (
-            <Badge>{property.category.name}</Badge>
-          )}
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <Badge variant="secondary" className="shrink-0">
+            {property.category.name}
+          </Badge>
+          <Badge
+            variant={property.isAvailable ? "default" : "secondary"}
+            className="shrink-0"
+          >
+            {property.isAvailable ? "Available" : "Rented"}
+          </Badge>
         </div>
-
-        <div className="text-3xl font-bold">
-          ৳ {property.price.toLocaleString()}
-          <span className="text-base text-muted-foreground font-normal">
-            /month
-          </span>
-        </div>
+        <h2 className="text-lg font-bold line-clamp-2">{property.title}</h2>
+        <p className="text-sm text-muted-foreground">{property.city}</p>
       </CardHeader>
 
-      <CardContent className="grid grid-cols-2 gap-4">
-
-        <div className="flex items-center gap-2">
-          <Bed className="w-4 h-4" />
-          {property.bedrooms ?? "--"} Beds
+      <CardContent className="space-y-4">
+        <div className="flex items-baseline justify-between">
+          <p className="text-2xl font-bold text-primary">
+            ৳{property.price.toLocaleString()}
+          </p>
+          <span className="text-xs text-muted-foreground">/month</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Bath className="w-4 h-4" />
-          {property.bathrooms ?? "--"} Baths
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-1">
+            <Star className="w-4 h-4 fill-primary text-primary" />
+            <span className="font-medium">{property.averageRating}</span>
+            <span className="text-muted-foreground">({property.totalReviews})</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Maximize2 className="w-4 h-4" />
-          {property.area ?? "--"} sqft
+        <div className="text-sm pt-2 border-t border-border">
+          <p className="text-muted-foreground">
+            <span className="font-medium text-foreground">Landlord:</span> {property.landlord.name}
+          </p>
         </div>
 
-        <Badge
-          variant={property.isAvailable ? "default" : "secondary"}
-          className="w-fit"
-        >
-          {property.isAvailable ? "Available" : "Unavailable"}
-        </Badge>
-
-        {property.furnished && (
-          <Badge variant="outline">Furnished</Badge>
-        )}
+        <Button asChild className="w-full">
+          <Link href={`/properties/${property.id}`}>
+            View Details
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );
-}
+};
+
+export default PropertiesCard;
