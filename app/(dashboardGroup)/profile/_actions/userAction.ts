@@ -82,7 +82,7 @@ export const uploadProfilePictureAction = async (
     body.append("image", formData.get("image") as File);
 
     const res = await fetch(
-      `${process.env.BACKEND_API_URL}/api/users/profile-picture`,
+      `${process.env.BACKEND_API_URL}/api/user/profile-picture`,
       {
         method: "PATCH",
         headers: {
