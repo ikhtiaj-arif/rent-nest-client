@@ -196,7 +196,7 @@ export const requestLandlordAction = async (
     };
 
     const res = await fetch(
-      `${process.env.BACKEND_API_URL}/api/users/request-landlord`,
+      `${process.env.BACKEND_API_URL}/api/user/request-landlord`,
       {
         method: "POST",
         headers: {
