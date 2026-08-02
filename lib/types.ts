@@ -85,6 +85,7 @@ export interface Property {
   bathrooms: number | null;
 
   furnished: boolean;
+  onRent?: boolean;
 
   isAvailable: boolean;
   availableFrom: string | null;

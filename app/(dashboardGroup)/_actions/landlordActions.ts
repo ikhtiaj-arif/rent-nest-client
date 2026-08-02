@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { AuthState } from "@/lib/types";
@@ -112,7 +111,7 @@ export const createProperty = async (
 ): Promise<AuthState> => {
   const headers = await getAuthHeaders();
   const availableFrom = formData.get("availableFrom") as string;
-    if (availableFrom) {
+  if (availableFrom) {
     formData.set("availableFrom", new Date(availableFrom).toISOString());
   }
   // Remove Content-Type header to let browser set it with boundary for multipart
@@ -151,47 +150,40 @@ export const updateProperty = async (
 ): Promise<AuthState> => {
   const headers = await getAuthHeaders();
 
-  // This action is bound via updateProperty.bind(null, property.id) and
-  // driven by useActionState, so React actually calls it as
-  // (propertyId, prevState, formData) — not (propertyId, payload) as it
-  // was previously typed. That mismatch meant `payload` silently received
-  // the *previous action state* instead of the form's fields, and
-  // JSON.stringify'd that into the request body every time, so edits
-  // never actually saved anything.
-  //
-  // Checkboxes are also excluded from FormData entirely when unchecked
-  // (not sent as "false" — just absent), so those need an explicit
-  // formData.has(...) check rather than formData.get(...).
- const payload: Record<string, unknown> = {
-  title: formData.get("title"),
-  description: formData.get("description"),
-  city: formData.get("city"),
-  address: formData.get("address"),
+  const availableFrom = formData.get("availableFrom") as string | null;
+  const payload: Record<string, unknown> = {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    city: formData.get("city"),
+    address: formData.get("address"),
 
-  price: formData.get("price")
-    ? parseFloat(formData.get("price") as string)
-    : null,
+    price: formData.get("price")
+      ? parseFloat(formData.get("price") as string)
+      : null,
 
-  bedrooms: formData.get("bedrooms")
-    ? parseInt(formData.get("bedrooms") as string, 10)
-    : null,
+    bedrooms: formData.get("bedrooms")
+      ? parseInt(formData.get("bedrooms") as string, 10)
+      : null,
 
-  bathrooms: formData.get("bathrooms")
-    ? parseInt(formData.get("bathrooms") as string, 10)
-    : null,
+    bathrooms: formData.get("bathrooms")
+      ? parseInt(formData.get("bathrooms") as string, 10)
+      : null,
 
-  area: formData.get("area")
-    ? parseFloat(formData.get("area") as string)
-    : null,
+    area: formData.get("area")
+      ? parseFloat(formData.get("area") as string)
+      : null,
 
-  categoryName: formData.get("categoryName"),
-  categoryDescription: formData.get("categoryDescription"),
+    categoryName: formData.get("categoryName"),
+    categoryDescription: formData.get("categoryDescription"),
 
-  availableFrom: formData.get("availableFrom"),
+    availableFrom: availableFrom ? new Date(availableFrom).toISOString() : null,
 
-  furnished: formData.has("furnished"),
-  isAvailable: formData.has("available"),
-};
+    furnished: formData.has("furnished"),
+    isAvailable: formData.has("available"),
+  };
+
+  console.log("Payload:", payload);
+  // console.table(payload);
 
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,

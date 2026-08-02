@@ -123,7 +123,7 @@ export default function PropertyForm({
     };
 
 
-    console.log("furnished", property?.furnished);
+    console.log("furnished", property);
 
 
     return (
@@ -144,13 +144,13 @@ export default function PropertyForm({
                 }
             </DialogTrigger>
             <DialogContent className="
-    w-[95vw]
-    max-w-5xl
-    h-[92vh]
-    p-0
-    overflow-hidden
-    rounded-2xl
-  ">
+                                        w-[95vw]
+                                        max-w-5xl
+                                        h-[92vh]
+                                        p-0
+                                        overflow-hidden
+                                        rounded-2xl
+                                    ">
                 <DialogHeader className="sticky top-0 z-20 border-b bg-background px-8 py-5">
                     <DialogTitle className="text-2xl font-bold">
                         {mode === "edit" ? "Edit Property" : "Create Property"}
@@ -158,15 +158,15 @@ export default function PropertyForm({
                 </DialogHeader>
                 <form
                     action={formAction}
-                    encType="multipart/form-data"
+                 
                     className="
-        flex-1
-        overflow-y-auto
-        px-8
-        py-6
-        space-y-8
-    "
-                >
+                                flex-1
+                                overflow-y-auto
+                                px-8
+                                py-6
+                                space-y-8
+                            "
+                                        >
                     {/* Property Details */}
 
                     <Card>

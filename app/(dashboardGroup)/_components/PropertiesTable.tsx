@@ -60,7 +60,7 @@ export default function PropertiesTable({
 
           <TableBody>
             {properties.map((property) => {
-              const canEdit = currentUserId === property.landlordId && property.isAvailable;
+              const canEdit = currentUserId === property.landlordId && !property.onRent;
 
               // console.log(currentUserId, property);
               return (<TableRow key={property.id}>
