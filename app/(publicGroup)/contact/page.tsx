@@ -34,7 +34,7 @@ export default function ContactPage() {
                                 </h3>
 
                                 <p className="text-muted-foreground">
-                                    support@homehaven.com
+                                    support@rentnest.com
                                 </p>
                             </div>
                         </div>

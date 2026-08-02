@@ -7,11 +7,11 @@ export default function AboutPage() {
             {/* Hero */}
             <section className="text-center">
                 <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-                    About HomeHaven
+                    About RentNest
                 </h1>
 
                 <p className="mx-auto mt-6 max-w-3xl text-lg text-muted-foreground">
-                    HomeHaven is a modern property rental platform that connects
+                    RentNest is a modern property rental platform that connects
                     tenants and landlords through a simple, secure, and transparent
                     rental experience. Whether you&apos;re searching for your next home
                     or managing multiple properties, we&apos;re here to make renting
@@ -58,7 +58,7 @@ export default function AboutPage() {
             {/* Features */}
             <section className="mt-20">
                 <h2 className="mb-10 text-center text-3xl font-bold">
-                    Why Choose HomeHaven?
+                    Why Choose RentNest?
                 </h2>
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

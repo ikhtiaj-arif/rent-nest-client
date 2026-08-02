@@ -79,7 +79,11 @@ export default function PropertyHero({
 
                         <div className="mt-2 flex items-end gap-2">
                             <span className="text-4xl font-bold">
-                                ${property.price.toLocaleString()}
+                                {new Intl.NumberFormat("en-BD", {
+                                    style: "currency",
+                                    currency: "BDT",
+                                    maximumFractionDigits: 0,
+                                }).format(property.price)}
                             </span>
 
                             <span className="pb-1 text-muted-foreground">
