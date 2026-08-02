@@ -21,11 +21,11 @@ export function MobileSidebarTrigger({ user }: NavbarProps) {
 
     let navItems: ISidebarItem[] = [];
 
-    if (user.data.profile.role === "TENANT") {
+    if (user?.data?.profile?.role === "TENANT") {
         navItems = sidebarMenuItems.TENANT;
-    } else if (user.data.profile.role === "LANDLORD") {
+    } else if (user?.data?.profile?.role === "LANDLORD") {
         navItems = sidebarMenuItems.LANDLORD;
-    } else if (user.data.profile.role === "ADMIN") {
+    } else if (user?.data?.profile?.role === "ADMIN") {
         navItems = sidebarMenuItems.ADMIN;
     }
 
@@ -44,7 +44,7 @@ export function MobileSidebarTrigger({ user }: NavbarProps) {
                     </div>
                     <div className="flex flex-col leading-tight">
                         <span className="font-semibold text-sm">RentNest</span>
-                        <span className="text-xs text-muted-foreground">{user.data.profile.role}</span>
+                        <span className="text-xs text-muted-foreground">{user?.data?.profile?.role}</span>
                     </div>
                 </div>
 
@@ -61,8 +61,8 @@ export function MobileSidebarTrigger({ user }: NavbarProps) {
                                         href={item.href}
                                         onClick={() => setOpen(false)}
                                         className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${isActive
-                                                ? "bg-primary text-primary-foreground"
-                                                : "text-foreground hover:bg-accent"
+                                            ? "bg-primary text-primary-foreground"
+                                            : "text-foreground hover:bg-accent"
                                             }`}
                                     >
                                         <Icon className="w-4 h-4 shrink-0" />

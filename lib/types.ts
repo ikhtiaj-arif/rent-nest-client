@@ -30,6 +30,7 @@ type RentalStatus =
 type PaymentProvider = "STRIPE" | "SSLCOMMERZ";
 
 type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED";
+type Gender= "MALE" | "FEMALE" | "OTHER";
 
 export interface IUser {
   success: boolean;
@@ -39,11 +40,19 @@ export interface IUser {
       id: string;
       email: string;
       name: string;
+      phone: string | null;
+
+      profilePicture: string | null;
+      bio: string | null;
+      gender: Gender | null;
+      dateOfBirth: string | null;
+      address: string | null;
+
       role: Role;
       status: UserStatus;
-      phone?: string | null;
-      createdAt: Date;
-      updatedAt: Date;
+
+      createdAt: string;
+      updatedAt: string;
     };
   };
 }

@@ -31,14 +31,37 @@ export const updateProfileAction = async (
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
 
-    const payload = {
-      name: formData.get("name"),
-      phone: formData.get("phone"),
-      bio: formData.get("bio"),
-      gender: formData.get("gender"),
-      dateOfBirth: formData.get("dateOfBirth"),
-      address: formData.get("address"),
-    };
+    const payload: Record<string, string> = {};
+
+    const name = formData.get("name")?.toString().trim();
+    if (name) {
+      payload.name = name;
+    }
+
+    const phone = formData.get("phone")?.toString().trim();
+    if (phone) {
+      payload.phone = phone;
+    }
+
+    const bio = formData.get("bio")?.toString().trim();
+    if (bio) {
+      payload.bio = bio;
+    }
+
+    const gender = formData.get("gender")?.toString().trim();
+    if (gender) {
+      payload.gender = gender;
+    }
+
+    const dateOfBirth = formData.get("dateOfBirth")?.toString().trim();
+    if (dateOfBirth) {
+      payload.dateOfBirth = dateOfBirth;
+    }
+
+    const address = formData.get("address")?.toString().trim();
+    if (address) {
+      payload.address = address;
+    }
 
     const res = await fetch(`${process.env.BACKEND_API_URL}/api/user/me`, {
       method: "PATCH",

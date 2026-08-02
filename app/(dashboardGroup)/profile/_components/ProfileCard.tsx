@@ -2,6 +2,7 @@ import { Calendar, Mail, MapPin, Phone, User } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import EditProfileDialog from "./EditProfileDialog";
 import ProfilePicture from "./ProfilePicture";
 
 interface ProfileCardProps {
@@ -33,14 +34,19 @@ export default function ProfileCard({
                     {/* Info */}
                     <div className="flex-1 space-y-5">
                         <div>
-                            <h2 className="text-2xl font-bold">{user.name}</h2>
 
-                            <div className="mt-2 flex flex-wrap gap-2">
-                                <Badge>{user.role}</Badge>
 
-                                <Badge variant="secondary">
-                                    {user.status}
-                                </Badge>
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-bold">{user.name}</h2>
+
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        <Badge>{user.role}</Badge>
+                                        <Badge variant="secondary">{user.status}</Badge>
+                                    </div>
+                                </div>
+
+                                <EditProfileDialog user={user} />
                             </div>
                         </div>
 
@@ -81,6 +87,7 @@ export default function ProfileCard({
                             </p>
                         </div>
                     </div>
+
                 </div>
             </CardContent>
         </Card>
