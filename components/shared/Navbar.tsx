@@ -5,8 +5,7 @@ import {
     LayoutDashboard,
     LogOut,
     Menu,
-    Settings,
-    User,
+    User
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -58,16 +57,16 @@ const userMenuItems = [
         icon: LayoutDashboard,
         action: "dashboard",
     },
-    {
-        label: "Profile",
-        icon: User,
-        action: "profile",
-    },
-    {
-        label: "Settings",
-        icon: Settings,
-        action: "settings",
-    },
+    // {
+    //     label: "Profile",
+    //     icon: User,
+    //     action: "profile",
+    // },
+    // {
+    //     label: "Settings",
+    //     icon: Settings,
+    //     action: "settings",
+    // },
 ];
 
 export function Navbar({ user }: NavbarProps) {
