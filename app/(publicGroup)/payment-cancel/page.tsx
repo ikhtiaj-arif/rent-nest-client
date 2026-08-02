@@ -35,7 +35,7 @@ export default function PaymentCancelPage() {
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild className="flex-1">
-              <Link href="/tenant-dashboard/payments">
+              <Link href="/dashboard/payments">
                 <CreditCard className="mr-2 h-4 w-4" />
                 Try Again
               </Link>
@@ -46,7 +46,7 @@ export default function PaymentCancelPage() {
               asChild
               className="flex-1"
             >
-              <Link href="/tenant-dashboard">
+              <Link href="/dashboard">
                 Back to Dashboard
               </Link>
             </Button>

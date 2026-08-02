@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
 import { Star } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { createReview } from "@/app/(dashboardGroup)/_actions/tenantActions";
@@ -10,7 +10,6 @@ import { initialAuthState } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
@@ -22,11 +21,13 @@ export default function ReviewForm({
   propertyId,
   rentalRequestId,
 }: Props) {
-    console.log("IDS", propertyId, rentalRequestId);
+
   const [state, formAction, pending] = useActionState(
     createReview,
     initialAuthState
   );
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
 
   useEffect(() => {
     if (!state.message) return;
@@ -61,26 +62,40 @@ export default function ReviewForm({
             value={rentalRequestId}
           />
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label>Rating</Label>
 
-            <Select name="rating" required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select rating" />
-              </SelectTrigger>
+            <input
+              type="hidden"
+              name="rating"
+              value={rating}
+            />
 
-              <SelectContent>
-                <SelectItem value="1">1 ⭐</SelectItem>
-                <SelectItem value="1.5">1.5 ⭐</SelectItem>
-                <SelectItem value="2">2 ⭐</SelectItem>
-                <SelectItem value="2.5">2.5 ⭐</SelectItem>
-                <SelectItem value="3">3 ⭐</SelectItem>
-                <SelectItem value="3.5">3.5 ⭐</SelectItem>
-                <SelectItem value="4">4 ⭐</SelectItem>
-                <SelectItem value="4.5">4.5 ⭐</SelectItem>
-                <SelectItem value="5">5 ⭐</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  className="transition-transform hover:scale-110"
+                >
+                  <Star
+                    className={`h-8 w-8 transition-colors ${star <= (hoveredRating || rating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                      }`}
+                  />
+                </button>
+              ))}
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              {rating === 0
+                ? "Select a rating"
+                : `${rating} out of 5`}
+            </p>
           </div>
 
           <div className="space-y-2">

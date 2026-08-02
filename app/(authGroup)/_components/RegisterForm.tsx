@@ -45,6 +45,32 @@ export default function RegisterForm() {
 
     return (
         <form action={action} className="space-y-5">
+            <div className="space-y-3">
+                <Label>I am registering as</Label>
+
+                <RadioGroup
+                    name="role"
+                    defaultValue="TENANT"
+                    className="grid grid-cols-2 gap-4"
+                >
+                    <Label className="cursor-pointer rounded-xl border p-4 transition hover:bg-accent has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                        <RadioGroupItem value="TENANT" className="sr-only" />
+
+                        <User className="mb-2 h-6 w-6 text-primary" />
+
+                        <p className="font-medium">Tenant</p>
+                    </Label>
+
+                    <Label className="cursor-pointer rounded-xl border p-4 transition hover:bg-accent has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                        <RadioGroupItem value="LANDLORD" className="sr-only" />
+
+                        <Building2 className="mb-2 h-6 w-6 text-primary" />
+
+                        <p className="font-medium">Landlord</p>
+                    </Label>
+                </RadioGroup>
+            </div>
+
             <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
 
@@ -142,37 +168,3 @@ export default function RegisterForm() {
         </form>
     );
 }
-
-
-<div className="space-y-3">
-    <Label>I am registering as</Label>
-
-    <RadioGroup
-        defaultValue="tenant"
-        className="grid grid-cols-2 gap-4"
-    >
-        <Label className="cursor-pointer rounded-xl border p-4 transition hover:bg-accent has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
-            <RadioGroupItem value="tenant" className="sr-only" />
-
-            <User className="mb-2 h-6 w-6 text-primary" />
-
-            <p className="font-medium">Tenant</p>
-
-            {/* <p className="text-xs text-muted-foreground">
-              Rent properties
-            </p> */}
-        </Label>
-
-        <Label className="cursor-pointer rounded-xl border p-4 transition hover:bg-accent has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
-            <RadioGroupItem value="landlord" className="sr-only" />
-
-            <Building2 className="mb-2 h-6 w-6 text-primary" />
-
-            <p className="font-medium">Landlord</p>
-
-            {/* <p className="text-xs text-muted-foreground">
-              List properties
-            </p> */}
-        </Label>
-    </RadioGroup>
-</div>
