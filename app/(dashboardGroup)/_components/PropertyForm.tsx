@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge, Loader2, PencilIcon, Plus, PlusIcon, UploadCloud } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,8 @@ export default function PropertyForm({
     );
     const [open, setOpen] = useState(false);
 
+    const router = useRouter();
+
     const [images, setImages] = useState<
         {
             file: File;
@@ -59,6 +62,7 @@ export default function PropertyForm({
             startTransition(() => {
                 setOpen(false);
                 setImages([]);
+                router.refresh();
             });
 
         } else {
@@ -119,7 +123,7 @@ export default function PropertyForm({
     };
 
 
-
+    console.log("furnished", property?.furnished);
 
 
     return (
@@ -189,7 +193,7 @@ export default function PropertyForm({
 
                                 <Textarea
                                     name="description"
-                                    // defaultValue={property?.description}
+                                    defaultValue={property?.description ?? ""}
                                     className="min-h-36"
                                     required
                                 />
@@ -210,7 +214,7 @@ export default function PropertyForm({
 
                                 <Input
                                     name="address"
-                                    // defaultValue={property?.address}
+                                    defaultValue={property?.address ?? ""}
                                     required
                                 />
                             </div>
@@ -247,7 +251,7 @@ export default function PropertyForm({
                                 <Input
                                     name="bedrooms"
                                     type="number"
-                                    // defaultValue={property?.bedrooms}
+                                    defaultValue={property?.bedrooms ?? ""}
                                     required
                                 />
                             </div>
@@ -258,7 +262,7 @@ export default function PropertyForm({
                                 <Input
                                     name="bathrooms"
                                     type="number"
-                                    // defaultValue={property?.bathrooms}
+                                    defaultValue={property?.bathrooms ?? ""}
                                     required
                                 />
                             </div>
@@ -350,9 +354,9 @@ export default function PropertyForm({
                                 <Label className="flex items-center gap-2">
                                     <Checkbox
                                         name="available"
-                                    // defaultChecked={
-                                    //     property?.available ?? true
-                                    // }
+                                        defaultChecked={
+                                            property ? property.isAvailable : true
+                                        }
                                     />
 
                                     Available
@@ -392,9 +396,48 @@ export default function PropertyForm({
 
                         <CardContent className="space-y-5">
 
+                            {mode === "edit" && property?.images && property.images.length > 0 && (
+                                <div className="space-y-3">
+                                    <p className="text-sm font-medium">
+                                        Current Photos
+                                    </p>
+
+                                    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                                        {property.images.map((image) => (
+                                            <div
+                                                key={image.id}
+                                                className="group relative overflow-hidden rounded-xl border"
+                                            >
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src={image.url}
+                                                    alt=""
+                                                    className="aspect-square w-full object-cover"
+                                                />
+
+                                                {image.isPrimary && (
+                                                    <Badge className="absolute left-2 top-2">
+                                                        Cover
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <p className="text-xs text-muted-foreground">
+                                        Replacing photos on an existing listing isn&apos;t
+                                        supported yet — uploads below only apply when
+                                        creating a new property.
+                                    </p>
+                                </div>
+                            )}
+
                             <Label
                                 htmlFor="images"
-                                className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed hover:border-primary transition"
+                                className={`flex h-44 flex-col items-center justify-center rounded-xl border-2 border-dashed transition ${mode === "edit"
+                                    ? "cursor-not-allowed opacity-50"
+                                    : "cursor-pointer hover:border-primary"
+                                    }`}
                             >
                                 <UploadCloud className="mb-3 h-8 w-8" />
 
@@ -412,6 +455,7 @@ export default function PropertyForm({
                                 name="images"
                                 type="file"
                                 multiple
+                                disabled={mode === "edit"}
                                 accept="image/*"
                                 className="hidden"
                                 onChange={handleImagesChange}

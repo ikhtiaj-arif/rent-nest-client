@@ -27,7 +27,7 @@ export default function RegisterForm() {
         initialAuthState);
 
     useEffect(() => {
-        if (!state) return;
+        if (!state || (state.statusCode === 0 && state.message === "")) return;
 
         if (state.success) {
             toast.success(state.message || "Registration successful. Please Login");

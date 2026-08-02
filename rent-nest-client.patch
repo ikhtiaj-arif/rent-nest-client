@@ -139,9 +139,18 @@ index 249bcd7..40a8506 100644
  
                      <button
 diff --git a/app/(authGroup)/_components/RegisterForm.tsx b/app/(authGroup)/_components/RegisterForm.tsx
-index 5c9b58d..0f03dec 100644
+index 5c9b58d..f5f5c92 100644
 --- a/app/(authGroup)/_components/RegisterForm.tsx
 +++ b/app/(authGroup)/_components/RegisterForm.tsx
+@@ -27,7 +27,7 @@ export default function RegisterForm() {
+         initialAuthState);
+ 
+     useEffect(() => {
+-        if (!state) return;
++        if (!state || (state.statusCode === 0 && state.message === "")) return;
+ 
+         if (state.success) {
+             toast.success(state.message || "Registration successful. Please Login");
 @@ -45,6 +45,32 @@ export default function RegisterForm() {
  
      return (
@@ -217,6 +226,119 @@ index 5c9b58d..0f03dec 100644
 \ No newline at end of file
 +}
 \ No newline at end of file
+diff --git a/app/(dashboardGroup)/_actions/landlordActions.ts b/app/(dashboardGroup)/_actions/landlordActions.ts
+index b3a7351..a08436b 100644
+--- a/app/(dashboardGroup)/_actions/landlordActions.ts
++++ b/app/(dashboardGroup)/_actions/landlordActions.ts
+@@ -2,7 +2,7 @@
+ "use server";
+ 
+ import { AuthState } from "@/lib/types";
+-import { revalidateTag } from "next/cache";
++import { revalidatePath, revalidateTag } from "next/cache";
+ import { cookies } from "next/headers";
+ 
+ const getAuthHeaders = async () => {
+@@ -124,16 +124,59 @@ export const createProperty = async (
+     },
+   );
+ 
+-  return res.json();
+-};
++  const result = await res.json();
+ 
+-// Update a property
++  // Without this, the create-property dialog closes and the fetch itself
++  // isn't cached (cache:"no-store" above) — but the *Router Cache* for
++  // pages the user has already visited in this session can still show
++  // the pre-create RSC payload until a hard reload or an explicit
++  // revalidation. This is what forces the properties list (and anywhere
++  // else properties are listed) to actually reflect the new property.
++  if (result?.success) {
++    revalidatePath("/landlord-dashboard/properties");
++    revalidatePath("/landlord-dashboard");
++    revalidatePath("/properties");
++  }
++
++  return result;
++};
+ export const updateProperty = async (
+   propertyId: string,
+-  payload: Record<string, any>,
++  prevState: AuthState,
++  formData: FormData,
+ ): Promise<AuthState> => {
+   const headers = await getAuthHeaders();
+ 
++  // This action is bound via updateProperty.bind(null, property.id) and
++  // driven by useActionState, so React actually calls it as
++  // (propertyId, prevState, formData) — not (propertyId, payload) as it
++  // was previously typed. That mismatch meant `payload` silently received
++  // the *previous action state* instead of the form's fields, and
++  // JSON.stringify'd that into the request body every time, so edits
++  // never actually saved anything.
++  //
++  // Checkboxes are also excluded from FormData entirely when unchecked
++  // (not sent as "false" — just absent), so those need an explicit
++  // formData.has(...) check rather than formData.get(...).
++  const payload: Record<string, unknown> = {
++    title: formData.get("title"),
++    description: formData.get("description"),
++    city: formData.get("city"),
++    address: formData.get("address"),
++    price: formData.get("price"),
++    bedrooms: formData.get("bedrooms"),
++    bathrooms: formData.get("bathrooms"),
++    area: formData.get("area"),
++    categoryName: formData.get("categoryName"),
++    categoryDescription: formData.get("categoryDescription"),
++    availableFrom: formData.get("availableFrom"),
++    furnished: formData.has("furnished") ? "true" : "false",
++    isAvailable: formData.has("available") ? "true" : "false",
++    // Note: this PUT endpoint doesn't accept multipart/image uploads
++    // (only POST /landlord/properties does) — new images selected while
++    // editing aren't sent here on purpose, not by accident.
++  };
++
+   const res = await fetch(
+     `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
+     {
+@@ -146,7 +189,16 @@ export const updateProperty = async (
+     },
+   );
+ 
+-  return res.json();
++  const result = await res.json();
++
++  if (result?.success) {
++    revalidatePath("/landlord-dashboard/properties");
++    revalidatePath("/landlord-dashboard");
++    revalidatePath("/properties");
++    revalidatePath(`/properties/${propertyId}`);
++  }
++
++  return result;
+ };
+ 
+ // Delete a property
+@@ -162,7 +214,16 @@ export const deleteProperty = async (propertyId: string) => {
+     },
+   );
+ 
+-  return res.json();
++  const result = await res.json();
++
++  if (result?.success) {
++    revalidatePath("/landlord-dashboard/properties");
++    revalidatePath("/landlord-dashboard");
++    revalidatePath("/properties");
++    revalidatePath(`/properties/${propertyId}`);
++  }
++
++  return result;
+ };
+ 
+ // Get property by ID
 diff --git a/app/(dashboardGroup)/_actions/tenantActions.ts b/app/(dashboardGroup)/_actions/tenantActions.ts
 index 992b72c..7c78799 100644
 --- a/app/(dashboardGroup)/_actions/tenantActions.ts
@@ -246,6 +368,142 @@ index 992b72c..7c78799 100644
  export const createRentalRequestAction = async (
    _prevState: AuthState,
    formData: FormData,
+diff --git a/app/(dashboardGroup)/_components/PropertyForm.tsx b/app/(dashboardGroup)/_components/PropertyForm.tsx
+index f991a42..6136090 100644
+--- a/app/(dashboardGroup)/_components/PropertyForm.tsx
++++ b/app/(dashboardGroup)/_components/PropertyForm.tsx
+@@ -2,6 +2,7 @@
+ 
+ import { Badge, Loader2, PencilIcon, Plus, PlusIcon, UploadCloud } from "lucide-react";
+ import { startTransition, useActionState, useEffect, useState } from "react";
++import { useRouter } from "next/navigation";
+ 
+ import { Button } from "@/components/ui/button";
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+@@ -38,6 +39,8 @@ export default function PropertyForm({
+     );
+     const [open, setOpen] = useState(false);
+ 
++    const router = useRouter();
++
+     const [images, setImages] = useState<
+         {
+             file: File;
+@@ -59,6 +62,7 @@ export default function PropertyForm({
+             startTransition(() => {
+                 setOpen(false);
+                 setImages([]);
++                router.refresh();
+             });
+ 
+         } else {
+@@ -189,7 +193,7 @@ export default function PropertyForm({
+ 
+                                 <Textarea
+                                     name="description"
+-                                    // defaultValue={property?.description}
++                                    defaultValue={property?.description ?? ""}
+                                     className="min-h-36"
+                                     required
+                                 />
+@@ -210,7 +214,7 @@ export default function PropertyForm({
+ 
+                                 <Input
+                                     name="address"
+-                                    // defaultValue={property?.address}
++                                    defaultValue={property?.address ?? ""}
+                                     required
+                                 />
+                             </div>
+@@ -247,7 +251,7 @@ export default function PropertyForm({
+                                 <Input
+                                     name="bedrooms"
+                                     type="number"
+-                                    // defaultValue={property?.bedrooms}
++                                    defaultValue={property?.bedrooms ?? ""}
+                                     required
+                                 />
+                             </div>
+@@ -258,7 +262,7 @@ export default function PropertyForm({
+                                 <Input
+                                     name="bathrooms"
+                                     type="number"
+-                                    // defaultValue={property?.bathrooms}
++                                    defaultValue={property?.bathrooms ?? ""}
+                                     required
+                                 />
+                             </div>
+@@ -350,9 +354,9 @@ export default function PropertyForm({
+                                 <Label className="flex items-center gap-2">
+                                     <Checkbox
+                                         name="available"
+-                                    // defaultChecked={
+-                                    //     property?.available ?? true
+-                                    // }
++                                        defaultChecked={
++                                            property ? property.isAvailable : true
++                                        }
+                                     />
+ 
+                                     Available
+@@ -392,9 +396,48 @@ export default function PropertyForm({
+ 
+                         <CardContent className="space-y-5">
+ 
++                            {mode === "edit" && property?.images && property.images.length > 0 && (
++                                <div className="space-y-3">
++                                    <p className="text-sm font-medium">
++                                        Current Photos
++                                    </p>
++
++                                    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
++                                        {property.images.map((image) => (
++                                            <div
++                                                key={image.id}
++                                                className="group relative overflow-hidden rounded-xl border"
++                                            >
++                                                {/* eslint-disable-next-line @next/next/no-img-element */}
++                                                <img
++                                                    src={image.url}
++                                                    alt=""
++                                                    className="aspect-square w-full object-cover"
++                                                />
++
++                                                {image.isPrimary && (
++                                                    <Badge className="absolute left-2 top-2">
++                                                        Cover
++                                                    </Badge>
++                                                )}
++                                            </div>
++                                        ))}
++                                    </div>
++
++                                    <p className="text-xs text-muted-foreground">
++                                        Replacing photos on an existing listing isn&apos;t
++                                        supported yet — uploads below only apply when
++                                        creating a new property.
++                                    </p>
++                                </div>
++                            )}
++
+                             <Label
+                                 htmlFor="images"
+-                                className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed hover:border-primary transition"
++                                className={`flex h-44 flex-col items-center justify-center rounded-xl border-2 border-dashed transition ${mode === "edit"
++                                    ? "cursor-not-allowed opacity-50"
++                                    : "cursor-pointer hover:border-primary"
++                                    }`}
+                             >
+                                 <UploadCloud className="mb-3 h-8 w-8" />
+ 
+@@ -412,6 +455,7 @@ export default function PropertyForm({
+                                 name="images"
+                                 type="file"
+                                 multiple
++                                disabled={mode === "edit"}
+                                 accept="image/*"
+                                 className="hidden"
+                                 onChange={handleImagesChange}
 diff --git a/app/(dashboardGroup)/admin-dashboard/loading.tsx b/app/(dashboardGroup)/admin-dashboard/loading.tsx
 new file mode 100644
 index 0000000..697a3f0
@@ -619,6 +877,111 @@ index ade983f..4879534 100644
      );
  };
  
+diff --git a/app/(publicGroup)/_components/PropertyInfo.tsx b/app/(publicGroup)/_components/PropertyInfo.tsx
+index 79f5cfb..b8e5402 100644
+--- a/app/(publicGroup)/_components/PropertyInfo.tsx
++++ b/app/(publicGroup)/_components/PropertyInfo.tsx
+@@ -8,10 +8,14 @@ import { Badge } from "@/components/ui/badge";
+ import { Separator } from "@/components/ui/separator";
+ import { Property } from "@/lib/types";
+ import {
++    Bed,
++    Bath,
+     Building2,
+     Calendar,
+     CheckCircle2,
+     MapPin,
++    Ruler,
++    Sofa,
+     Star,
+ } from "lucide-react";
+ 
+@@ -30,9 +34,43 @@ export default function PropertyInfo({
+         },
+         {
+             label: "City",
+-            value: property.city,
++            value: property.address
++                ? `${property.address}, ${property.city}`
++                : property.city,
+             icon: MapPin,
+         },
++        ...(property.bedrooms != null
++            ? [
++                {
++                    label: "Bedrooms",
++                    value: property.bedrooms,
++                    icon: Bed,
++                },
++            ]
++            : []),
++        ...(property.bathrooms != null
++            ? [
++                {
++                    label: "Bathrooms",
++                    value: property.bathrooms,
++                    icon: Bath,
++                },
++            ]
++            : []),
++        ...(property.area != null
++            ? [
++                {
++                    label: "Area",
++                    value: `${property.area.toLocaleString()} sqft`,
++                    icon: Ruler,
++                },
++            ]
++            : []),
++        {
++            label: "Furnished",
++            value: property.furnished ? "Yes" : "No",
++            icon: Sofa,
++        },
+         {
+             label: "Average Rating",
+             value: `${property.averageRating || 0} / 5`,
+@@ -43,6 +81,17 @@ export default function PropertyInfo({
+             value: property.totalReviews,
+             icon: Star,
+         },
++        ...(property.availableFrom
++            ? [
++                {
++                    label: "Available From",
++                    value: new Date(
++                        property.availableFrom,
++                    ).toLocaleDateString(),
++                    icon: Calendar,
++                },
++            ]
++            : []),
+         {
+             label: "Listed On",
+             value: new Date(property.createdAt).toLocaleDateString(),
+@@ -57,6 +106,15 @@ export default function PropertyInfo({
+             </CardHeader>
+ 
+             <CardContent className="space-y-6">
++                {property.description && (
++                    <>
++                        <p className="whitespace-pre-line text-muted-foreground">
++                            {property.description}
++                        </p>
++                        <Separator />
++                    </>
++                )}
++
+                 <div className="grid gap-6 sm:grid-cols-2">
+                     {info.map((item) => {
+                         const Icon = item.icon;
+@@ -124,4 +182,4 @@ export default function PropertyInfo({
+             </CardContent>
+         </Card>
+     );
+-}
+\ No newline at end of file
++}
 diff --git a/app/(publicGroup)/payment-cancel/page.tsx b/app/(publicGroup)/payment-cancel/page.tsx
 index c234164..ba6d191 100644
 --- a/app/(publicGroup)/payment-cancel/page.tsx

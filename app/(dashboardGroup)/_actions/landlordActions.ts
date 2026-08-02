@@ -2,7 +2,7 @@
 "use server";
 
 import { AuthState } from "@/lib/types";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 const getAuthHeaders = async () => {
@@ -128,15 +128,70 @@ export const createProperty = async (
     },
   );
 
-  return res.json();
-};
+  const result = await res.json();
 
-// Update a property
+  // Without this, the create-property dialog closes and the fetch itself
+  // isn't cached (cache:"no-store" above) — but the *Router Cache* for
+  // pages the user has already visited in this session can still show
+  // the pre-create RSC payload until a hard reload or an explicit
+  // revalidation. This is what forces the properties list (and anywhere
+  // else properties are listed) to actually reflect the new property.
+  if (result?.success) {
+    revalidatePath("/landlord-dashboard/properties");
+    revalidatePath("/landlord-dashboard");
+    revalidatePath("/properties");
+  }
+
+  return result;
+};
 export const updateProperty = async (
   propertyId: string,
-  payload: Record<string, any>,
+  prevState: AuthState,
+  formData: FormData,
 ): Promise<AuthState> => {
   const headers = await getAuthHeaders();
+
+  // This action is bound via updateProperty.bind(null, property.id) and
+  // driven by useActionState, so React actually calls it as
+  // (propertyId, prevState, formData) — not (propertyId, payload) as it
+  // was previously typed. That mismatch meant `payload` silently received
+  // the *previous action state* instead of the form's fields, and
+  // JSON.stringify'd that into the request body every time, so edits
+  // never actually saved anything.
+  //
+  // Checkboxes are also excluded from FormData entirely when unchecked
+  // (not sent as "false" — just absent), so those need an explicit
+  // formData.has(...) check rather than formData.get(...).
+ const payload: Record<string, unknown> = {
+  title: formData.get("title"),
+  description: formData.get("description"),
+  city: formData.get("city"),
+  address: formData.get("address"),
+
+  price: formData.get("price")
+    ? parseFloat(formData.get("price") as string)
+    : null,
+
+  bedrooms: formData.get("bedrooms")
+    ? parseInt(formData.get("bedrooms") as string, 10)
+    : null,
+
+  bathrooms: formData.get("bathrooms")
+    ? parseInt(formData.get("bathrooms") as string, 10)
+    : null,
+
+  area: formData.get("area")
+    ? parseFloat(formData.get("area") as string)
+    : null,
+
+  categoryName: formData.get("categoryName"),
+  categoryDescription: formData.get("categoryDescription"),
+
+  availableFrom: formData.get("availableFrom"),
+
+  furnished: formData.has("furnished"),
+  isAvailable: formData.has("available"),
+};
 
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
@@ -150,7 +205,16 @@ export const updateProperty = async (
     },
   );
 
-  return res.json();
+  const result = await res.json();
+
+  if (result?.success) {
+    revalidatePath("/landlord-dashboard/properties");
+    revalidatePath("/landlord-dashboard");
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
+  }
+
+  return result;
 };
 
 // Delete a property
@@ -166,7 +230,16 @@ export const deleteProperty = async (propertyId: string) => {
     },
   );
 
-  return res.json();
+  const result = await res.json();
+
+  if (result?.success) {
+    revalidatePath("/landlord-dashboard/properties");
+    revalidatePath("/landlord-dashboard");
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${propertyId}`);
+  }
+
+  return result;
 };
 
 // Get property by ID
