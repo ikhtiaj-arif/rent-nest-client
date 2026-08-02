@@ -25,7 +25,7 @@ const DashboardLayout = async (
             <SidebarProvider>
                 <div className="flex flex-1">
                     <DashboardSidebar user={user} />
-                    <main className="flex-1 min-w-0">{children}</main>
+                    <main className="flex-1 min-w-0 lg:px-4">{children}</main>
                 </div>
             </SidebarProvider>
         </div>

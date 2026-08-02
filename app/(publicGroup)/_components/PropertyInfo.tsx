@@ -8,10 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Property } from "@/lib/types";
 import {
+    Bed,
+    Bath,
     Building2,
     Calendar,
     CheckCircle2,
     MapPin,
+    Ruler,
+    Sofa,
     Star,
 } from "lucide-react";
 
@@ -30,8 +34,42 @@ export default function PropertyInfo({
         },
         {
             label: "City",
-            value: property.city,
+            value: property.address
+                ? `${property.address}, ${property.city}`
+                : property.city,
             icon: MapPin,
+        },
+        ...(property.bedrooms != null
+            ? [
+                {
+                    label: "Bedrooms",
+                    value: property.bedrooms,
+                    icon: Bed,
+                },
+            ]
+            : []),
+        ...(property.bathrooms != null
+            ? [
+                {
+                    label: "Bathrooms",
+                    value: property.bathrooms,
+                    icon: Bath,
+                },
+            ]
+            : []),
+        ...(property.area != null
+            ? [
+                {
+                    label: "Area",
+                    value: `${property.area.toLocaleString()} sqft`,
+                    icon: Ruler,
+                },
+            ]
+            : []),
+        {
+            label: "Furnished",
+            value: property.furnished ? "Yes" : "No",
+            icon: Sofa,
         },
         {
             label: "Average Rating",
@@ -43,6 +81,17 @@ export default function PropertyInfo({
             value: property.totalReviews,
             icon: Star,
         },
+        ...(property.availableFrom
+            ? [
+                {
+                    label: "Available From",
+                    value: new Date(
+                        property.availableFrom,
+                    ).toLocaleDateString(),
+                    icon: Calendar,
+                },
+            ]
+            : []),
         {
             label: "Listed On",
             value: new Date(property.createdAt).toLocaleDateString(),
@@ -57,6 +106,15 @@ export default function PropertyInfo({
             </CardHeader>
 
             <CardContent className="space-y-6">
+                {property.description && (
+                    <>
+                        <p className="whitespace-pre-line text-muted-foreground">
+                            {property.description}
+                        </p>
+                        <Separator />
+                    </>
+                )}
+
                 <div className="grid gap-6 sm:grid-cols-2">
                     {info.map((item) => {
                         const Icon = item.icon;

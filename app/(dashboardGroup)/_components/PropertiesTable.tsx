@@ -17,8 +17,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/lib/types";
-import PropertyForm from "./PropertyForm";
 import { Home } from "lucide-react";
+import PropertyForm from "./PropertyForm";
 
 
 interface PropertiesTableProps {
@@ -60,7 +60,8 @@ export default function PropertiesTable({
 
           <TableBody>
             {properties.map((property) => {
-              const canEdit = currentUserId === property.landlordId;
+              const canEdit = currentUserId === property.landlordId && !property.onRent;
+
               // console.log(currentUserId, property);
               return (<TableRow key={property.id}>
                 <TableCell>
@@ -74,7 +75,7 @@ export default function PropertiesTable({
                         className="rounded-md object-cover"
                       />
                     ) : (
-                      <Home className="h-[60px] w-[60px] rounded-md bg-muted" />
+                      <Home className="h-15 w-15 rounded-md bg-muted" />
                     )}
 
                     <div>
