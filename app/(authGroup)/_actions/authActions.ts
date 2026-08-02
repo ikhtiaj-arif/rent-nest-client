@@ -87,7 +87,7 @@ export const loginAction = async (
     }
     // console.log("decoded", decodedToken);
     if (decodedToken.role === "TENANT") {
-      redirect("/tenant-dashboard");
+      redirect("/dashboard");
     } else if (decodedToken.role === "ADMIN") {
       redirect("/admin-dashboard");
     } else if (decodedToken.role === "LANDLORD") {
@@ -117,6 +117,7 @@ export const registerAction = async (
       phone: formData.get("phone"),
       password: formData.get("password"),
       confirmPassword: formData.get("confirmPassword"),
+      role: formData.get("role"),
     };
 
     const res = await fetch(

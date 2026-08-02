@@ -1,8 +1,8 @@
 "use client";
 
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { loginAction } from "../_actions/authActions";
 
@@ -22,12 +22,14 @@ export default function LoginForm() {
     useEffect(() => {
         if (!state) return;
 
-        // if (state.success) {
-        //     toast.success(state.message);
-
-        // } else {
-        //     toast.error(state.message);
-        // }
+        if (state.success) {
+            toast.success(state.message);
+        } else if (state.message) {
+            // initialAuthState has success:false with no message on first
+            // render — only toast once the user has actually submitted
+            // and gotten a real result back.
+            toast.error(state.message);
+        }
     }, [state]);
 
     return (
@@ -40,21 +42,11 @@ export default function LoginForm() {
                     type="email"
                     placeholder="Enter your email"
                     required
-                    defaultValue={'admin@example.com'}
                 />
             </div>
 
             <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                    <Label>Password</Label>
-
-                    <Link
-                        href="/forgot-password"
-                        className="text-sm text-primary hover:underline"
-                    >
-                        Forgot password?
-                    </Link>
-                </div>
+                <Label>Password</Label>
 
                 <div className="relative">
                     <Input
@@ -63,7 +55,6 @@ export default function LoginForm() {
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         className="pr-10"
-                        defaultValue={'SuperSecurePassword123!'}
                     />
 
                     <button

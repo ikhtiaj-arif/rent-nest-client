@@ -111,6 +111,10 @@ export const createProperty = async (
   formData: FormData,
 ): Promise<AuthState> => {
   const headers = await getAuthHeaders();
+  const availableFrom = formData.get("availableFrom") as string;
+    if (availableFrom) {
+    formData.set("availableFrom", new Date(availableFrom).toISOString());
+  }
   // Remove Content-Type header to let browser set it with boundary for multipart
   const headersWithoutContentType = { ...headers };
   // delete headersWithoutContentType["Content-Type"];

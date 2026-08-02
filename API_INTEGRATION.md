@@ -35,13 +35,19 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 - **Payload**:
   ```json
   {
-    "firstName": "John",
-    "lastName": "Doe",
+    "name": "John Doe",
     "email": "john@example.com",
+    "phone": "+1234567890",
     "password": "password123",
+    "confirmPassword": "password123",
     "role": "TENANT" | "LANDLORD"
   }
   ```
+  Note: `confirmPassword` is checked client-side only and is not sent on to the
+  backend's `registerDB` service. `role` is optional — omitting it (or sending
+  anything other than `TENANT`/`LANDLORD`) defaults to `TENANT` server-side.
+  `ADMIN` cannot be self-registered through this endpoint; admin accounts are
+  seeded only.
 - **Response**: Authentication token, User profile
 
 ---
@@ -129,14 +135,20 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 - **Response**: Payment details, invoice, receipt
 
 #### Payment Success
-- **File**: `app/(dashboardGroup)/dashboard/payments/success/page.tsx`
-- **Triggered By**: Stripe redirect after successful payment
-- **Query Params**: `?status=success&sessionId=cs_live_xxx`
-- **Backend Endpoint**: `POST /payments/{paymentId}/confirm`
-- **Action**: Update payment status to COMPLETED
+- **File**: `app/(publicGroup)/payment-success/page.tsx`
+- **Triggered By**: Stripe's `success_url` redirect after checkout completes
+- **Query Params**: `?session_id={CHECKOUT_SESSION_ID}` (set by Stripe itself)
+- **Backend Endpoint**: `GET /payments/session/{sessionId}` — polled client-side
+  every ~2s (via `PaymentStatusPoller`) for up to ~20s
+- **Action**: Payment confirmation is asynchronous — Stripe's webhook calls
+  `POST /payments/confirm` **server-to-server**, not from this page. The
+  redirect landing here only means checkout was *submitted*, not that the
+  webhook has processed it yet. The page polls until `status` flips from
+  `PENDING` to `COMPLETED` (or `FAILED`), and falls back to a "still
+  processing" state if it doesn't resolve within the timeout.
 
 #### Payment Cancel
-- **File**: `app/(dashboardGroup)/dashboard/payments/cancel/page.tsx`
+- **File**: `app/(publicGroup)/payment-cancel/page.tsx`
 - **Triggered By**: User cancels Stripe checkout
 - **Display**: Cancellation message, retry options
 

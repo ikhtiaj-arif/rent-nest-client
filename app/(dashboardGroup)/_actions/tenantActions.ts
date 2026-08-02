@@ -92,6 +92,24 @@ export const getPaymentById = async (id: string) => {
   return res.json();
 };
 
+// Used by /payment-success, which only has Stripe's session_id from the
+// redirect URL query param — not our internal payment.id. This is what
+// gets polled to find out whether the webhook has actually confirmed
+// the payment yet.
+export const getPaymentBySession = async (sessionId: string) => {
+  const headers = await getAuthHeaders();
+
+  const res = await fetch(
+    `${process.env.BACKEND_API_URL}/api/payments/session/${sessionId}`,
+    {
+      headers,
+      cache: "no-store",
+    },
+  );
+
+  return res.json();
+};
+
 export const createRentalRequestAction = async (
   _prevState: AuthState,
   formData: FormData,
