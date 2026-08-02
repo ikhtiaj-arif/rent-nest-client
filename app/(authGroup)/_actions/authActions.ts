@@ -3,8 +3,8 @@
 import { AuthState } from "@/lib/types";
 import { handleApiError } from "@/service/hadleApiError";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { cookies } from "next/headers";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 // type LoginState = {
@@ -77,33 +77,36 @@ export const loginAction = async (
       };
     }
 
+  
     if (
       redirectTo &&
-      typeof redirectTo === "string" &&
       redirectTo.startsWith("/") &&
       !redirectTo.startsWith("//")
     ) {
       redirect(redirectTo);
     }
-    // console.log("decoded", decodedToken);
-    if (decodedToken.role === "TENANT") {
-      redirect("/dashboard");
-    } else if (decodedToken.role === "ADMIN") {
-      redirect("/admin-dashboard");
-    } else if (decodedToken.role === "LANDLORD") {
-      redirect("/landlord-dashboard");
-    } else {
-      redirect("/");
+
+    // Default landing pages.
+    switch (decodedToken.role) {
+      case "TENANT":
+        redirect("/dashboard");
+
+      case "LANDLORD":
+        redirect("/landlord-dashboard");
+
+      case "ADMIN":
+        redirect("/admin-dashboard");
+
+      default:
+        redirect("/");
+    }
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
     }
 
-  } catch (error) {
-     if (isRedirectError(error)) {
-    throw error;
-  }
     return handleApiError(error);
   }
-
-  //   return result;
 };
 
 export const registerAction = async (

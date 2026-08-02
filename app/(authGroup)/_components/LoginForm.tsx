@@ -16,7 +16,7 @@ import { useSearchParams } from "next/navigation";
 export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const searchParams = useSearchParams();
-    const redirectTo = searchParams.get("redirectTo") ?? ""
+    const redirectTo = searchParams.get("redirect") ?? ""
     const [state, action, pending] = useActionState(loginAction.bind(null, redirectTo), initialAuthState)
 
     useEffect(() => {

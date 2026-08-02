@@ -23,6 +23,7 @@ export default function RegisterForm() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
+
     const [state, action, pending] = useActionState(registerAction,
         initialAuthState);
 
