@@ -26,10 +26,7 @@ interface HeroSectionProps {
 export default function HeroSection({
     user,
 }: HeroSectionProps) {
-    console.log({
-        user,
 
-    });
     const router = useRouter();
 
     const [searchTerm, setSearchTerm] = useState("");
