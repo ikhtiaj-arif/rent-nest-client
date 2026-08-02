@@ -31,7 +31,7 @@ export default function PropertyPagination({ meta }: Props) {
     const searchParams = useSearchParams();
 
     const navigate = (page: number) => {
-        if (page < 1 || page > meta.totalPage) return;
+        if (page < 1 || page > meta?.totalPage) return;
 
         const params = new URLSearchParams(searchParams.toString());
 
@@ -40,39 +40,39 @@ export default function PropertyPagination({ meta }: Props) {
         router.push(`${pathname}?${params.toString()}`);
     };
 
-    if (meta.totalPage <= 1) return null;
+    if (meta?.totalPage <= 1) return null;
 
     const pages: (number | "...")[] = [];
 
-    if (meta.totalPage <= 5) {
-        for (let i = 1; i <= meta.totalPage; i++) {
+    if (meta?.totalPage <= 5) {
+        for (let i = 1; i <= meta?.totalPage; i++) {
             pages.push(i);
         }
-    } else if (meta.page <= 3) {
-        pages.push(1, 2, 3, 4, "...", meta.totalPage);
-    } else if (meta.page >= meta.totalPage - 2) {
+    } else if (meta?.page <= 3) {
+        pages.push(1, 2, 3, 4, "...", meta?.totalPage);
+    } else if (meta?.page >= meta?.totalPage - 2) {
         pages.push(
             1,
             "...",
-            meta.totalPage - 3,
-            meta.totalPage - 2,
-            meta.totalPage - 1,
-            meta.totalPage
+            meta?.totalPage - 3,
+            meta?.totalPage - 2,
+            meta?.totalPage - 1,
+            meta?.totalPage
         );
     } else {
         pages.push(
             1,
             "...",
-            meta.page - 1,
-            meta.page,
-            meta.page + 1,
+            meta?.page - 1,
+            meta?.page,
+            meta?.page + 1,
             "...",
-            meta.totalPage
+            meta?.totalPage
         );
     }
 
-    const isFirstPage = meta.page === 1;
-    const isLastPage = meta.page === meta.totalPage;
+    const isFirstPage = meta?.page === 1;
+    const isLastPage = meta?.page === meta?.totalPage;
 
     return (
         <Pagination className="mt-10">
@@ -93,7 +93,7 @@ export default function PropertyPagination({ meta }: Props) {
                             e.preventDefault();
 
                             if (!isFirstPage) {
-                                navigate(meta.page - 1);
+                                navigate(meta?.page - 1);
                             }
                         }}
                     />
@@ -110,7 +110,7 @@ export default function PropertyPagination({ meta }: Props) {
                         <PaginationItem key={page}>
                             <PaginationLink
                                 href="#"
-                                isActive={page === meta.page}
+                                isActive={page === meta?.page}
                                 onClick={(e) => {
                                     e.preventDefault();
                                     navigate(page);
@@ -137,7 +137,7 @@ export default function PropertyPagination({ meta }: Props) {
                             e.preventDefault();
 
                             if (!isLastPage) {
-                                navigate(meta.page + 1);
+                                navigate(meta?.page + 1);
                             }
                         }}
                     />

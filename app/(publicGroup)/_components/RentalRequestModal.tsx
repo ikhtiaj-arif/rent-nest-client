@@ -109,7 +109,9 @@ export default function RentalRequestModal({
                                 name="moveInDate"
                                 type="date"
                                 required
-                                min={new Date().toISOString().split("T")[0]}
+                                min={property.availableFrom
+                                    ? new Date(property.availableFrom).toISOString().split("T")[0]
+                                    : new Date().toISOString().split("T")[0]}
                                 className="pl-10"
                             />
                         </div>

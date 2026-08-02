@@ -120,7 +120,7 @@ export default async function TenantDashboard() {
                                         icon={CreditCard}
                                     />
                                     <QuickActionButton
-                                        href="/dashboard/rental-requests/new"
+                                        href="/properties?isAvailable=true"
                                         label="New Request"
                                         icon={Plus}
                                     />
@@ -201,7 +201,7 @@ export default async function TenantDashboard() {
                                     <p className="text-muted-foreground mb-6 max-w-sm">
                                         Start your rental journey by creating your first request. Explore available properties and make your move today.
                                     </p>
-                                    <Link href="/dashboard/rental-requests/new">
+                                    <Link href="/properties?isAvailable=true">
                                         <Button className="gap-2">
                                             <Plus className="w-4 h-4" />
                                             Create First Request
