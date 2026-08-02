@@ -42,10 +42,10 @@ export default async function RentalRequestDetailPage({
     // Build timeline based on status
     const getTimelineSteps = () => {
         const allSteps = [
-            { status: 'PENDING', label: 'Pending Request', completed: false, current: rental.status === 'PENDING' },
-            { status: 'APPROVED', label: 'Approved by Landlord', completed: ['APPROVED', 'ACTIVE', 'COMPLETED'].includes(rental.status), current: rental.status === 'APPROVED' },
-            { status: 'ACTIVE', label: 'Lease Active', completed: ['ACTIVE', 'COMPLETED'].includes(rental.status), current: rental.status === 'ACTIVE' },
-            { status: 'COMPLETED', label: 'Lease Completed', completed: rental.status === 'COMPLETED', current: false },
+            { status: 'PENDING', label: 'Pending Request', completed: false, current: rental?.status === 'PENDING' },
+            { status: 'APPROVED', label: 'Approved by Landlord', completed: ['APPROVED', 'ACTIVE', 'COMPLETED'].includes(rental?.status), current: rental?.status === 'APPROVED' },
+            { status: 'ACTIVE', label: 'Lease Active', completed: ['ACTIVE', 'COMPLETED'].includes(rental?.status), current: rental?.status === 'ACTIVE' },
+            { status: 'COMPLETED', label: 'Lease Completed', completed: rental?.status === 'COMPLETED', current: false },
         ];
         return allSteps.filter(step => step.status !== 'REJECTED');
     };
@@ -67,7 +67,7 @@ export default async function RentalRequestDetailPage({
         }
     };
 
-    const statusColor = getStatusColor(rental.status);
+    const statusColor = getStatusColor(rental?.status);
 
     return (
         <div className="min-h-screen bg-background p-4 md:p-8">
@@ -81,10 +81,10 @@ export default async function RentalRequestDetailPage({
                             </Button>
                         </Link>
                         <div>
-                            <h1 className="text-3xl font-bold text-foreground">{rental.property?.title}</h1>
+                            <h1 className="text-3xl font-bold text-foreground">{rental?.property?.title}</h1>
                             <p className="text-muted-foreground flex items-center gap-1 mt-2">
                                 <MapPin className="w-4 h-4" />
-                                {rental.property?.city}
+                                {rental?.property?.city}
                             </p>
                         </div>
                     </div>
@@ -110,7 +110,7 @@ export default async function RentalRequestDetailPage({
                                             Monthly Rent
                                         </p>
                                         <p className="text-2xl font-bold text-foreground">
-                                            ৳ {rental.property?.price?.toLocaleString() || 'N/A'}
+                                            ৳ {rental?.property?.price?.toLocaleString() || 'N/A'}
                                         </p>
                                     </div>
                                     <div className="space-y-1">
@@ -119,7 +119,7 @@ export default async function RentalRequestDetailPage({
                                             Move-in Date
                                         </p>
                                         <p className="text-lg font-semibold text-foreground">
-                                            {rental.moveInDate ? formatDate(rental.moveInDate) : 'N/A'}
+                                            {rental?.moveInDate ? formatDate(rental?.moveInDate) : 'N/A'}
                                         </p>
                                     </div>
                                     <div className="space-y-1">
@@ -128,7 +128,7 @@ export default async function RentalRequestDetailPage({
                                             Request Date
                                         </p>
                                         <p className="text-lg font-semibold text-foreground">
-                                            {rental.createdAt ? formatDate(rental.createdAt) : 'N/A'}
+                                            {rental?.createdAt ? formatDate(rental?.createdAt) : 'N/A'}
                                         </p>
                                     </div>
                                 </div>
@@ -148,8 +148,8 @@ export default async function RentalRequestDetailPage({
                         </Card>
 
                         {/* Property Details */}
-                        {rental.property && (
-                            <PropertiesCard property={rental.property} />
+                        {rental?.property && (
+                            <PropertiesCard property={rental?.property} />
                         )}
                     </div>
 
@@ -161,13 +161,13 @@ export default async function RentalRequestDetailPage({
                                 <CardTitle className="text-lg">Actions</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
-                                {rental.status === 'APPROVED' && rental.payment.status !== "COMPLETED" && (
-                                    <PayNowButton rentalRequestId={rental.id} />
+                                {rental?.status === 'APPROVED' && rental?.payment?.status !== "COMPLETED" && (
+                                    <PayNowButton rentalRequestId={rental?.id} />
                                 )}
-                                {rental.payment.status === "COMPLETED" && (
+                                {rental?.payment?.status === "COMPLETED" && (
                                     <ReviewForm
-                                        propertyId={rental.property.id}
-                                        rentalRequestId={rental.id}
+                                        propertyId={rental?.property.id}
+                                        rentalRequestId={rental?.id}
                                     />
                                 )}
                                 <Button variant="outline" className="w-full gap-2">
@@ -182,7 +182,7 @@ export default async function RentalRequestDetailPage({
                                     <Download className="w-4 h-4" />
                                     Download Agreement
                                 </Button>
-                                {rental.status === 'PENDING' && (
+                                {rental?.status === 'PENDING' && (
                                     <Button variant="destructive" className="w-full gap-2">
                                         Cancel Request
                                     </Button>
@@ -191,13 +191,13 @@ export default async function RentalRequestDetailPage({
                         </Card>
 
                         {/* Landlord Card */}
-                        {rental.landlord && (
+                        {rental?.property?.landlord && (
                             <LandlordCard landlord={{
-                                name: rental.landlord.name,
-                                email: rental.landlord.email,
-                                phone: rental.landlord.phone,
-                                // averageRating: rental.landlord.averageRating,
-                                // totalReviews: rental.landlord.totalReviews,
+                                name: rental?.property?.landlord?.name,
+                                email: rental?.property?.landlord?.email,
+                                phone: rental?.property?.landlord?.phone,
+                                // averageRating: rental?.property?.landlord?.averageRating,
+                                // totalReviews: rental?.landlord?.totalReviews,
                             }} />
                         )}
 
@@ -211,15 +211,15 @@ export default async function RentalRequestDetailPage({
                                     <span className="text-muted-foreground">Request ID</span>
                                     <span className="font-mono text-foreground">{id}</span>
                                 </div>
-                                {rental.moveOutDate && (
+                                {rental?.moveOutDate && (
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Move-out Date</span>
-                                        <span className="text-foreground">{formatDate(rental.moveOutDate)}</span>
+                                        <span className="text-foreground">{formatDate(rental?.moveOutDate)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Status</span>
-                                    <span className="text-foreground">{rental.status}</span>
+                                    <span className="text-foreground">{rental?.status}</span>
                                 </div>
                             </CardContent>
                         </Card>
