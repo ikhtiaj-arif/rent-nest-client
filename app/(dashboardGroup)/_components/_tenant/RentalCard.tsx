@@ -52,6 +52,11 @@ export function RentalRequestCard({
       text: "text-slate-700 dark:text-slate-300",
       label: "Completed",
     },
+    CANCELLED: {
+      bg: "bg-red-50 dark:bg-red-950",
+      text: "text-red-700 dark:text-red-300",
+      label: "Cancelled",
+    },
   } as const;
 
   const config = statusConfig[status];

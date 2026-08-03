@@ -1,12 +1,14 @@
 import { getRentalRequestById } from '@/app/(dashboardGroup)/_actions/tenantActions';
+import CancelRequestDialog from '@/app/(dashboardGroup)/_components/_tenant/CancelRentalRequest';
 import { LandlordCard } from '@/app/(dashboardGroup)/_components/_tenant/LandlordCard';
 import PayNowButton from '@/app/(dashboardGroup)/_components/_tenant/PayNowButton';
 import ReviewForm from '@/app/(dashboardGroup)/_components/_tenant/ReviewForm';
 import { StatusTimeline } from '@/app/(dashboardGroup)/_components/_tenant/StatusTimeline';
+import EndRentalDialog from '@/app/(dashboardGroup)/_components/EndRentalDialog';
 import PropertiesCard from '@/app/(publicGroup)/_components/PropertiesCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate } from '@/lib/utils';
 import { ArrowLeft, Calendar, Clock, DollarSign, Download, Home, MapPin, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
@@ -21,6 +23,7 @@ export default async function RentalRequestDetailPage({
     const { id } = await params;
     const rentalRes = await getRentalRequestById(id);
     const rental = rentalRes?.data;
+    const hasReviewed = rental.reviews.length > 0;
 
     if (!rental) {
         return (
@@ -164,11 +167,38 @@ export default async function RentalRequestDetailPage({
                                 {rental?.status === 'APPROVED' && rental?.payment?.status !== "COMPLETED" && (
                                     <PayNowButton rentalRequestId={rental?.id} />
                                 )}
-                                {rental?.payment?.status === "COMPLETED" && (
+                                {/* {rental?.payment?.status === "COMPLETED" && (
+                                    
                                     <ReviewForm
                                         propertyId={rental?.property.id}
                                         rentalRequestId={rental?.id}
                                     />
+                                )} */}
+                                {rental.status === "COMPLETED" && (
+                                    <>
+                                        {hasReviewed ? (
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle>Your Review</CardTitle>
+                                                </CardHeader>
+
+                                                <CardContent>
+                                                    <p className="font-medium">
+                                                        ⭐ {rental.reviews[0].rating}/5
+                                                    </p>
+
+                                                    <p className="mt-2 text-muted-foreground">
+                                                        {rental.reviews[0].comment}
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
+                                        ) : (
+                                            <ReviewForm
+                                                propertyId={rental.property.id}
+                                                rentalRequestId={rental.id}
+                                            />
+                                        )}
+                                    </>
                                 )}
                                 <Button variant="outline" className="w-full gap-2">
                                     <MessageSquare className="w-4 h-4" />
@@ -182,11 +212,12 @@ export default async function RentalRequestDetailPage({
                                     <Download className="w-4 h-4" />
                                     Download Agreement
                                 </Button>
-                                {rental?.status === 'PENDING' && (
-                                    <Button variant="destructive" className="w-full gap-2">
-                                        Cancel Request
-                                    </Button>
+                                {rental.status === "PENDING" && (
+                                    <CancelRequestDialog
+                                        rentalRequestId={rental.id}
+                                    />
                                 )}
+
                             </CardContent>
                         </Card>
 
@@ -223,6 +254,20 @@ export default async function RentalRequestDetailPage({
                                 </div>
                             </CardContent>
                         </Card>
+                        {rental.status === "ACTIVE" && (
+                            <Card className="mt-6">
+                                <CardHeader>
+                                    <CardTitle>Rental Actions</CardTitle>
+                                    <CardDescription>
+                                        Once you&apos;re leaving this property, end the rental.
+                                    </CardDescription>
+                                </CardHeader>
+
+                                <CardContent>
+                                    <EndRentalDialog rentalRequestId={rental.id} />
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
                 </div>
             </div>
