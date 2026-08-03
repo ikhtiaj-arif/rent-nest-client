@@ -1,6 +1,7 @@
 "use server";
 
 import { AuthState } from "@/lib/types";
+import { handleApiError } from "@/service/hadleApiError";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -105,44 +106,105 @@ export async function updateRentalRequestStatus(
 }
 
 // Create a new property
+
 export const createProperty = async (
-  prevState: AuthState,
+  _prevState: AuthState,
   formData: FormData,
 ): Promise<AuthState> => {
   const headers = await getAuthHeaders();
-  const availableFrom = formData.get("availableFrom") as string;
-  if (availableFrom) {
-    formData.set("availableFrom", new Date(availableFrom).toISOString());
+
+  if (!headers) {
+    return {
+      success: false,
+      statusCode: 403,
+      message: "User not logged in.",
+    };
   }
-  // Remove Content-Type header to let browser set it with boundary for multipart
-  const headersWithoutContentType = { ...headers };
-  // delete headersWithoutContentType["Content-Type"];
+
+  const payload = new FormData();
+
+  [
+    "title",
+    "description",
+    "city",
+    "address",
+    "price",
+    "bedrooms",
+    "bathrooms",
+    "area",
+    "categoryName",
+    "categoryDescription",
+  ].forEach((key) => {
+    const value = formData.get(key);
+    if (value) payload.append(key, value as string);
+  });
+
+  payload.append("furnished", String(formData.get("furnished") === "on"));
+
+  payload.append("available", String(formData.get("available") === "on"));
+
+  payload.append(
+    "availableFrom",
+    new Date(formData.get("availableFrom") as string).toISOString(),
+  );
+
+  const images = formData.getAll("images") as File[];
+
+  images.forEach((image) => {
+    if (image instanceof File && image.size > 0) {
+      payload.append("images", image, image.name);
+    }
+  });
+
+  // console.log("Original FormData images:");
+  // images.forEach((image, index) => {
+  //   console.log(index, {
+  //     name: image.name,
+  //     size: image.size,
+  //     type: image.type,
+  //     instanceofFile: image instanceof File,
+  //   });
+  // });
+
+  images.forEach((image) => {
+    if (image instanceof File && image.size > 0) {
+      payload.append("images", image, image.name);
+    }
+  });
+
+  // console.log("Payload contents:");
+  for (const [key, value] of payload.entries()) {
+    if (value instanceof File) {
+      console.log(key, {
+        name: value.name,
+        size: value.size,
+        type: value.type,
+      });
+    } else {
+      console.log(key, value);
+    }
+  }
 
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/landlord/properties`,
     {
       method: "POST",
-      headers: headersWithoutContentType,
-      body: formData,
+      headers,
+      body: payload,
     },
   );
 
   const result = await res.json();
 
-  // Without this, the create-property dialog closes and the fetch itself
-  // isn't cached (cache:"no-store" above) — but the *Router Cache* for
-  // pages the user has already visited in this session can still show
-  // the pre-create RSC payload until a hard reload or an explicit
-  // revalidation. This is what forces the properties list (and anywhere
-  // else properties are listed) to actually reflect the new property.
-  if (result?.success) {
-    revalidatePath("/landlord-dashboard/properties");
-    revalidatePath("/landlord-dashboard");
-    revalidatePath("/properties");
+  if (result.success) {
+    revalidateTag("properties", { expire: 0 });
+    revalidateTag("filter-options", { expire: 0 });
+    revalidateTag("landlord-properties", { expire: 0 });
   }
 
   return result;
 };
+
 export const updateProperty = async (
   propertyId: string,
   prevState: AuthState,
@@ -210,30 +272,43 @@ export const updateProperty = async (
 };
 
 // Delete a property
-export const deleteProperty = async (propertyId: string) => {
-  const headers = await getAuthHeaders();
+export const deleteProperty = async (
+  propertyId: string,
+): Promise<AuthState> => {
+  try {
+    const headers = await getAuthHeaders();
 
-  const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
-    {
-      method: "DELETE",
-      headers,
-      cache: "no-store",
-    },
-  );
+    const res = await fetch(
+      `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
+      {
+        method: "DELETE",
+        headers,
+      },
+    );
 
-  const result = await res.json();
+    const result = await res.json();
 
-  if (result?.success) {
-    revalidatePath("/landlord-dashboard/properties");
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message,
+      };
+    }
+
     revalidatePath("/landlord-dashboard");
+    revalidatePath("/landlord-dashboard/properties");
     revalidatePath("/properties");
-    revalidatePath(`/properties/${propertyId}`);
+
+    return {
+      success: true,
+      statusCode: result.statusCode,
+      message: result.message,
+    };
+  } catch (error) {
+    return handleApiError(error);
   }
-
-  return result;
 };
-
 // Get property by ID
 export const getPropertyById = async (id: string) => {
   const headers = await getAuthHeaders();

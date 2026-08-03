@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Property, initialAuthState } from "@/lib/types";
 import { createProperty, updateProperty } from "../_actions/landlordActions";
+import Image from "next/image";
 
 interface Props {
     mode: "create" | "edit";
@@ -71,29 +72,48 @@ export default function PropertyForm({
     }, [state, mode]);
 
 
-    const handleImagesChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const files = Array.from(e.target.files ?? []);
 
-        if (!files.length) return;
 
-        const mapped = files.map((file) => ({
-            file,
-            preview: URL.createObjectURL(file),
-            isPrimary: false,
-        }));
+    const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
 
-        setImages((prev) => {
-            const updated = [...prev, ...mapped];
+   const handleImagesChange = (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const files = Array.from(e.target.files ?? []);
 
-            if (!updated.some((img) => img.isPrimary)) {
-                updated[0].isPrimary = true;
-            }
+  if (!files.length) return;
 
-            return updated;
-        });
-    };
+  const validFiles = files.filter((file) => {
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error(
+        `${file.name} exceeds the 1MB limit. Please upload a smaller image.`
+      );
+      return false;
+    }
+
+    return true;
+  });
+
+  if (!validFiles.length) return;
+
+  const mapped = validFiles.map((file) => ({
+    file,
+    preview: URL.createObjectURL(file),
+    isPrimary: false,
+  }));
+
+  setImages((prev) => {
+    const updated = [...prev, ...mapped];
+
+    if (!updated.some((img) => img.isPrimary) && updated.length > 0) {
+      updated[0].isPrimary = true;
+    }
+
+    return updated;
+  });
+};
+
+    
 
     const removeImage = (index: number) => {
         setImages((prev) => {
@@ -158,7 +178,7 @@ export default function PropertyForm({
                 </DialogHeader>
                 <form
                     action={formAction}
-                 
+
                     className="
                                 flex-1
                                 overflow-y-auto
@@ -166,7 +186,7 @@ export default function PropertyForm({
                                 py-6
                                 space-y-8
                             "
-                                        >
+                >
                     {/* Property Details */}
 
                     <Card>
@@ -446,7 +466,7 @@ export default function PropertyForm({
                                 </p>
 
                                 <p className="text-sm text-muted-foreground">
-                                    JPG, PNG, WEBP
+                                    JPG, PNG, WEBP • Max 1MB per image
                                 </p>
                             </Label>
 
@@ -472,10 +492,12 @@ export default function PropertyForm({
                                             className="group relative overflow-hidden rounded-xl border"
                                         >
 
-                                            <img
+                                            <Image
                                                 src={image.preview}
-                                                alt=""
-                                                className="aspect-square w-full object-cover"
+                                                alt={`Property image ${index + 1}`}
+                                                fill
+                                                unoptimized
+                                                className="rounded-xl object-cover"
                                             />
 
                                             {image.isPrimary && (
