@@ -239,3 +239,82 @@ export async function createReview(
     return handleApiError(error);
   }
 }
+
+
+// cancel rental
+export const cancelRentalRequestAction = async (
+  rentalRequestId: string,
+): Promise<AuthState> => {
+  try {
+    const headers = await getAuthHeaders();
+
+    const res = await fetch(
+      `${process.env.BACKEND_API_URL}/api/rentals/${rentalRequestId}/cancel`,
+      {
+        method: "PATCH",
+        headers,
+      },
+    );
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message ?? "Failed to cancel rental request.",
+      };
+    }
+
+    revalidatePath("/dashboard/rental-requests");
+    revalidatePath(`/dashboard/rental-requests/${rentalRequestId}`);
+
+    return {
+      success: true,
+      statusCode: result.statusCode,
+      message: result.message ?? "Rental request cancelled successfully.",
+      data: result.data,
+    };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const endRentalAction = async (
+  rentalRequestId: string,
+): Promise<AuthState> => {
+  try {
+    const headers = await getAuthHeaders();
+
+    const res = await fetch(
+      `${process.env.BACKEND_API_URL}/api/rentals/${rentalRequestId}/end`,
+      {
+        method: "PATCH",
+        headers,
+      },
+    );
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message ?? "Failed to end rental.",
+      };
+    }
+
+    revalidatePath("/dashboard/rental-requests");
+    revalidatePath(`/dashboard/rental-requests/${rentalRequestId}`);
+    revalidatePath("/dashboard/payments");
+
+    return {
+      success: true,
+      statusCode: result.statusCode,
+      message: result.message ?? "Rental ended successfully.",
+      data: result.data,
+    };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};

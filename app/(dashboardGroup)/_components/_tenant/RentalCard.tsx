@@ -1,11 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, MapPin, DollarSign, ChevronRight } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { formatDate } from '@/lib/utils';
+import { CalendarIcon, ChevronRight, DollarSign } from 'lucide-react';
+import Link from 'next/link';
 
 interface RentalRequestCardProps {
   id: string;
@@ -27,11 +27,32 @@ export function RentalRequestCard({
   property,
 }: RentalRequestCardProps) {
   const statusConfig = {
-    ACTIVE: { bg: 'bg-emerald-50 dark:bg-emerald-950', text: 'text-emerald-700 dark:text-emerald-300', label: 'Active' },
-    APPROVED: { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', label: 'Approved' },
-    PENDING: { bg: 'bg-amber-50 dark:bg-amber-950', text: 'text-amber-700 dark:text-amber-300', label: 'Pending' },
-    REJECTED: { bg: 'bg-red-50 dark:bg-red-950', text: 'text-red-700 dark:text-red-300', label: 'Rejected' },
-  };
+    ACTIVE: {
+      bg: "bg-emerald-50 dark:bg-emerald-950",
+      text: "text-emerald-700 dark:text-emerald-300",
+      label: "Active",
+    },
+    APPROVED: {
+      bg: "bg-blue-50 dark:bg-blue-950",
+      text: "text-blue-700 dark:text-blue-300",
+      label: "Approved",
+    },
+    PENDING: {
+      bg: "bg-amber-50 dark:bg-amber-950",
+      text: "text-amber-700 dark:text-amber-300",
+      label: "Pending",
+    },
+    REJECTED: {
+      bg: "bg-red-50 dark:bg-red-950",
+      text: "text-red-700 dark:text-red-300",
+      label: "Rejected",
+    },
+    COMPLETED: {
+      bg: "bg-slate-100 dark:bg-slate-800",
+      text: "text-slate-700 dark:text-slate-300",
+      label: "Completed",
+    },
+  } as const;
 
   const config = statusConfig[status];
 

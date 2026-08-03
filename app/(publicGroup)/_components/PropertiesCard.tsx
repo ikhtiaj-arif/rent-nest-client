@@ -4,7 +4,6 @@ import { Property } from '@/lib/types';
 import { Building2, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
 
 const PropertiesCard = ({ property }: { property: Property }) => {
     const primaryImage =
@@ -47,7 +46,7 @@ const PropertiesCard = ({ property }: { property: Property }) => {
                 <p className="mt-2 text-gray-500">{property.city}</p>
 
                 <p className="mt-4 text-2xl font-bold text-primary">
-                    BDT {property.price.toLocaleString()} 
+                    BDT {property.price.toLocaleString()}/month
                 </p>
 
                 <div className="mt-4 flex items-center justify-between text-sm text-gray-500">

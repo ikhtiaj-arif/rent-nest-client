@@ -20,6 +20,7 @@ import { Property } from "@/lib/types";
 import { Home } from "lucide-react";
 import DeletePropertyDialog from "./DeletePropertyDialog";
 import PropertyForm from "./PropertyForm";
+import EndRentalDialog from "./EndRentalDialog";
 
 
 interface PropertiesTableProps {
@@ -56,6 +57,7 @@ export default function PropertiesTable({
               <TableHead>Requests</TableHead>
               <TableHead>Reviews</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Action</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -63,6 +65,8 @@ export default function PropertiesTable({
           <TableBody>
             {properties.map((property) => {
               const canEdit = currentUserId === property.landlordId && !property.onRent;
+              const isOwner = currentUserId === property.landlordId; 
+              const canEndRental = isOwner && property.onRent;
 
               // console.log(currentUserId, property);
               return (<TableRow key={property.id}>
@@ -147,6 +151,7 @@ export default function PropertiesTable({
                         propertyId={property.id}
                       /> </>
                     )}
+                     
                   </div>
                 </TableCell>
               </TableRow>)

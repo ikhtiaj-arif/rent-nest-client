@@ -116,12 +116,14 @@ export default function LandlordRequestTable({
                     <RejectRequestDialog
                       requestId={request.id}
                     />
+                    
                   </div>
                 ) : (
                   <span className="text-sm text-muted-foreground">
                     Reviewed
                   </span>
                 )}
+                
               </TableCell>
             </TableRow>
           ))}

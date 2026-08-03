@@ -8,20 +8,31 @@ import { Button } from "@/components/ui/button";
 
 import { AuthState } from "@/lib/types";
 import { updateRentalRequestStatus } from "../_actions/landlordActions";
+import EndRentalDialog from "./EndRentalDialog";
 
 export interface RentalRequest {
   id: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status:
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "ACTIVE"
+  | "COMPLETED"
+  | "CANCELLED";
   moveInDate: string;
   tenant: {
+    id: string;
     name: string;
     email: string;
     phone: string;
   };
   property: {
+    id: string;
     title: string;
     city: string;
     price: number;
+    onRent: boolean;
+    isAvailable: boolean;
   };
 }
 export const initialAuthState: AuthState = {
@@ -96,66 +107,78 @@ export default function RentalRequestsTable({
         </thead>
 
         <tbody>
-          {requests.map((request) => (
-            <tr
-              key={request.id}
-              className="border-t hover:bg-muted/40 transition-colors"
-            >
-              <td className="px-6 py-4">
-                <div>
-                  <p className="font-medium">{request.tenant.name}</p>
+          {requests.map((request) => {
+
+            console.log(request);
+            return (
+              <tr
+                key={request.id}
+                className="border-t hover:bg-muted/40 transition-colors"
+              >
+                <td className="px-6 py-4">
+                  <div>
+                    <p className="font-medium">{request.tenant.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {request.tenant.email}
+                    </p>
+                  </div>
+                </td>
+
+                <td className="px-6 py-4">
+                  <p className="font-medium">{request.property.title}</p>
                   <p className="text-sm text-muted-foreground">
-                    {request.tenant.email}
+                    {request.property.city}
                   </p>
-                </div>
-              </td>
+                </td>
 
-              <td className="px-6 py-4">
-                <p className="font-medium">{request.property.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  {request.property.city}
-                </p>
-              </td>
+                <td className="px-6 py-4">
+                  {new Date(request.moveInDate).toLocaleDateString()}
+                </td>
 
-              <td className="px-6 py-4">
-                {new Date(request.moveInDate).toLocaleDateString()}
-              </td>
+                <td className="px-6 py-4">
+                  <Badge
+                    variant={
+                      request.status === "ACTIVE"
+                        ? "default"
+                        : request.status === "PENDING"
+                          ? "secondary"
+                          : request.status === "REJECTED"
+                            ? "destructive"
+                            : request.status === "COMPLETED"
+                              ? "outline"
+                              : "secondary"
+                    }
+                  >
+                    {request.status}
+                  </Badge>
+                </td>
 
-              <td className="px-6 py-4">
-                <Badge
-                  variant={
-                    request.status === "APPROVED"
-                      ? "default"
-                      : request.status === "REJECTED"
-                        ? "destructive"
-                        : "secondary"
-                  }
-                >
-                  {request.status}
-                </Badge>
-              </td>
+                <td className="px-6 py-4">
+                  {request.status === "PENDING" ? (
+                    <div className="flex justify-end gap-2">
+                      <UpdateButton
+                        id={request.id}
+                        status="APPROVED"
+                      />
 
-              <td className="px-6 py-4">
-                {request.status === "PENDING" ? (
-                  <div className="flex justify-end gap-2">
-                    <UpdateButton
-                      id={request.id}
-                      status="APPROVED"
-                    />
+                      <UpdateButton
+                        id={request.id}
+                        status="REJECTED"
+                      />
+                    </div>
+                  ) : request.status === "ACTIVE" && request.property.onRent ? (
+                    <div className="flex justify-end">
+                      <EndRentalDialog rentalRequestId={request.id} />
+                    </div>
+                  ) : (
+                    <div className="text-right text-sm text-muted-foreground">
+                      —
+                    </div>)}
 
-                    <UpdateButton
-                      id={request.id}
-                      status="REJECTED"
-                    />
-                  </div>
-                ) : (
-                  <div className="text-right text-sm text-muted-foreground">
-                    —
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
