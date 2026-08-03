@@ -183,3 +183,24 @@ export interface RentalRequest {
 }
 
 export type IStats<T extends string = string> = Record<T, number>;
+
+export type RequestStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+}
+
+export interface LandlordRequest {
+  id: string;
+  userId: string;
+  user: User;
+  requestReason: string;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
+  status: RequestStatus;
+  rejectionReason?: string | null;
+}
