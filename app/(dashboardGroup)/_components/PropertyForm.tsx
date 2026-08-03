@@ -76,48 +76,44 @@ export default function PropertyForm({
 
     const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
 
-    const handleImagesChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const files = Array.from(e.target.files ?? []);
+   const handleImagesChange = (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const files = Array.from(e.target.files ?? []);
 
-        if (!files.length) return;
+  if (!files.length) return;
 
-        const validFiles = files.filter((file) => {
-            if (file.size > MAX_IMAGE_SIZE) {
-                toast.error(
-                    `${file.name} exceeds the 1MB limit. Please upload a smaller image.`
-                );
-                return false;
-            }
+  const validFiles = files.filter((file) => {
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error(
+        `${file.name} exceeds the 1MB limit. Please upload a smaller image.`
+      );
+      return false;
+    }
 
-            return true;
-        });
+    return true;
+  });
 
-        if (!validFiles.length) {
-            e.target.value = "";
-            return;
-        }
+  if (!validFiles.length) return;
 
-        const mapped = validFiles.map((file) => ({
-            file,
-            preview: URL.createObjectURL(file),
-            isPrimary: false,
-        }));
+  const mapped = validFiles.map((file) => ({
+    file,
+    preview: URL.createObjectURL(file),
+    isPrimary: false,
+  }));
 
-        setImages((prev) => {
-            const updated = [...prev, ...mapped];
+  setImages((prev) => {
+    const updated = [...prev, ...mapped];
 
-            if (!updated.some((img) => img.isPrimary) && updated.length > 0) {
-                updated[0].isPrimary = true;
-            }
+    if (!updated.some((img) => img.isPrimary) && updated.length > 0) {
+      updated[0].isPrimary = true;
+    }
 
-            return updated;
-        });
+    return updated;
+  });
+};
 
-        // Allow selecting the same file again
-        e.target.value = "";
-    };
+    
 
     const removeImage = (index: number) => {
         setImages((prev) => {

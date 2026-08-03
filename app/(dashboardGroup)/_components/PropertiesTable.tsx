@@ -18,8 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/lib/types";
 import { Home } from "lucide-react";
-import PropertyForm from "./PropertyForm";
 import DeletePropertyDialog from "./DeletePropertyDialog";
+import PropertyForm from "./PropertyForm";
 
 
 interface PropertiesTableProps {
@@ -40,6 +40,7 @@ export default function PropertiesTable({
   currentUserId,
   showLandlord,
 }: PropertiesTableProps) {
+  console.log("properties", properties);
 
   return (
     <>

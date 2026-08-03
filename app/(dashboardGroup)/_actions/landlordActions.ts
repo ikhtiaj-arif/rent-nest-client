@@ -148,11 +148,42 @@ export const createProperty = async (
     new Date(formData.get("availableFrom") as string).toISOString(),
   );
 
-  (formData.getAll("images") as File[]).forEach((file) => {
-    if (file.size > 0) {
-      payload.append("images", file);
+  const images = formData.getAll("images") as File[];
+
+  images.forEach((image) => {
+    if (image instanceof File && image.size > 0) {
+      payload.append("images", image, image.name);
     }
   });
+
+  // console.log("Original FormData images:");
+  // images.forEach((image, index) => {
+  //   console.log(index, {
+  //     name: image.name,
+  //     size: image.size,
+  //     type: image.type,
+  //     instanceofFile: image instanceof File,
+  //   });
+  // });
+
+  images.forEach((image) => {
+    if (image instanceof File && image.size > 0) {
+      payload.append("images", image, image.name);
+    }
+  });
+
+  // console.log("Payload contents:");
+  for (const [key, value] of payload.entries()) {
+    if (value instanceof File) {
+      console.log(key, {
+        name: value.name,
+        size: value.size,
+        type: value.type,
+      });
+    } else {
+      console.log(key, value);
+    }
+  }
 
   const res = await fetch(
     `${process.env.BACKEND_API_URL}/api/landlord/properties`,
@@ -252,7 +283,7 @@ export const deleteProperty = async (
       {
         method: "DELETE",
         headers,
-      }
+      },
     );
 
     const result = await res.json();
