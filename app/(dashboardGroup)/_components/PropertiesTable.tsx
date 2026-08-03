@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Property } from "@/lib/types";
 import { Home } from "lucide-react";
 import PropertyForm from "./PropertyForm";
+import DeletePropertyDialog from "./DeletePropertyDialog";
 
 
 interface PropertiesTableProps {
@@ -135,11 +136,15 @@ export default function PropertiesTable({
                       </Link>
                     </Button>
 
-                    {canEdit && (
+                    {canEdit && (<>
                       <PropertyForm
                         mode="edit"
                         property={property}
                       />
+
+                      <DeletePropertyDialog
+                        propertyId={property.id}
+                      /> </>
                     )}
                   </div>
                 </TableCell>
