@@ -109,7 +109,7 @@ export default function RentalRequestsTable({
         <tbody>
           {requests.map((request) => {
 
-            console.log(request);
+            // console.log(request);
             return (
               <tr
                 key={request.id}

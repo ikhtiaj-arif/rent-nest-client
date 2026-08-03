@@ -1,14 +1,16 @@
 "use server"
 
 import { getLandlordRequests } from "../../_actions/adminActions";
- 
- 
+import LandlordRentalRequestsTable from "../../_components/LandlordRentalRequestsTable";
+
+
 
 
 const LandlordRequestsPage = async () => {
     const requestRes = await getLandlordRequests();
 
     const requests = requestRes?.data ?? [];
+ 
 
     return (
         <div className="space-y-6">
@@ -27,9 +29,9 @@ const LandlordRequestsPage = async () => {
                     No pending requests.
                 </div>
             ) : (
-<></>
-                // <LandlordRequestTable
-                //     requests={requests} />
+
+                <LandlordRentalRequestsTable
+                    requests={requests} />
 
             )}
         </div>
