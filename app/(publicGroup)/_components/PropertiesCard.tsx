@@ -47,7 +47,7 @@ const PropertiesCard = ({ property }: { property: Property }) => {
                 <p className="mt-2 text-gray-500">{property.city}</p>
 
                 <p className="mt-4 text-2xl font-bold text-primary">
-                    ${property.price.toLocaleString()}/month
+                    BDT {property.price.toLocaleString()} 
                 </p>
 
                 <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
