@@ -120,7 +120,7 @@ export const registerAction = async (
       phone: formData.get("phone"),
       password: formData.get("password"),
       confirmPassword: formData.get("confirmPassword"),
-      role: formData.get("role"),
+      // role: formData.get("role"),
     };
 
     const res = await fetch(

@@ -37,6 +37,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { logout } from "@/service/logout";
+import Image from "next/image";
 
 const navItems = [
     { label: "Home", href: "/" },
@@ -72,6 +73,8 @@ const userMenuItems = [
 export function Navbar({ user }: NavbarProps) {
     const pathname = usePathname();
     const router = useRouter();
+    const profilePicture = user.data?.profile.profilePicture;
+
 
     const handleUserMenuAction = async (action: string) => {
         switch (action) {
@@ -164,9 +167,19 @@ export function Navbar({ user }: NavbarProps) {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="rounded-full outline-none ring-offset-background transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                                        <User className="h-5 w-5 text-primary" />
-                                    </div>
+                                    {profilePicture ? (
+                                        <Image
+                                            src={profilePicture}
+                                            alt={user.data?.profile.name}
+                                            width={35}
+                                            height={35}
+                                            className="h-9 w-9 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                                            <User className="h-5 w-5 text-primary" />
+                                        </div>
+                                    )}
                                 </button>
                             </DropdownMenuTrigger>
 

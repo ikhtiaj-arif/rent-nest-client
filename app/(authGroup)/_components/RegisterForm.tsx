@@ -1,12 +1,11 @@
 "use client";
 
-import { Building2, Eye, EyeOff, Loader2, User } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useActionState, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 
 import { toast } from "sonner";
@@ -46,7 +45,7 @@ export default function RegisterForm() {
 
     return (
         <form action={action} className="space-y-5">
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
                 <Label>I am registering as</Label>
 
                 <RadioGroup
@@ -70,7 +69,7 @@ export default function RegisterForm() {
                         <p className="font-medium">Landlord</p>
                     </Label>
                 </RadioGroup>
-            </div>
+            </div> */}
 
             <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
