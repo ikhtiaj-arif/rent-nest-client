@@ -490,25 +490,4 @@ JWT_SECRET=your_jwt_secret_key
 
 ---
 
-## Changelog: Filter & Cache Fixes (Phase 1 Audit)
 
-- **Properties sort/category filters**: the properties list UI (`SortFilter.tsx`,
-  `CategoryFilter.tsx`) sends `sort` and `categoryId` query params. The backend
-  previously only read `sortBy`/`sortOrder`/`type` (category *name*), so both
-  filters were silently ignored. `GET /api/properties` and
-  `GET /api/landlord/properties` now honor `sort` and `categoryId` directly.
-- **Admin landlord-request approve/reject cache**: `getLandlordRequests`
-  fetches with the `landlord-requests` cache tag, but
-  `updateLandlordRequestAction` never invalidated it. Approving/rejecting a
-  request now calls `revalidateTag("landlord-requests", "max")` plus
-  `revalidatePath` for `/admin-dashboard/landlord-requests` and
-  `/admin-dashboard/users`, so the table updates immediately instead of
-  requiring a hard refresh.
-- **Profile mutations**: `updateProfileAction`, `uploadProfilePictureAction`,
-  `changePasswordAction`, and `requestLandlordAction` now `revalidatePath("/profile")`
-  on success for the same reason.
-- **`_actions` consistency**: `updateUserById`, `createRentalRequestAction`,
-  `createPaymentAction`, and `createReview` now follow the same
-  try/catch → `res.ok` check → `handleApiError` pattern used elsewhere
-  (e.g. `landlordActions.ts`), instead of returning `res.json()` directly
-  without checking for failure.
