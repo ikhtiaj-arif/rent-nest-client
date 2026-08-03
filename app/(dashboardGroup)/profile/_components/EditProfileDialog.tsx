@@ -4,6 +4,7 @@
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,14 +36,21 @@ export default function EditProfileDialog({ user }: Props) {
     );
 
     useEffect(() => {
+        if (!state.message) return;
+
         if (state.success) {
+            toast.success(state.message);
             startTransition(() => {
                 setOpen(false);
                 router.refresh()
             })
-
+        } else {
+            // Previously this branch was silently dropped — a failed
+            // update (e.g. validation error from the backend) gave the
+            // user no feedback at all and just sat there.
+            toast.error(state.message);
         }
-    }, [state.success, router]);
+    }, [state, router]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

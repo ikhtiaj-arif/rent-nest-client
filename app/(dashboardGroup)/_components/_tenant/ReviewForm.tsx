@@ -1,7 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { createReview } from "@/app/(dashboardGroup)/_actions/tenantActions";
@@ -26,6 +26,7 @@ export default function ReviewForm({
     createReview,
     initialAuthState
   );
+  const formRef = useRef<HTMLFormElement>(null);
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
 
@@ -34,6 +35,10 @@ export default function ReviewForm({
 
     if (state.success) {
       toast.success(state.message);
+      startTransition(() => {
+        setRating(0);
+      });
+      formRef.current?.reset();
     } else {
       toast.error(state.message);
     }
@@ -49,7 +54,7 @@ export default function ReviewForm({
       </CardHeader>
 
       <CardContent>
-        <form action={formAction} className="space-y-4">
+        <form ref={formRef} action={formAction} className="space-y-4">
           <input
             type="hidden"
             name="propertyId"

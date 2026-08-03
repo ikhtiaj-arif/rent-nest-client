@@ -48,8 +48,9 @@ export default function ChangePasswordCard() {
         if (state.success) {
             toast.success(state.message);
             startTransition(() => {
-
                 setOpen(false);
+                setNewPassword("");
+                setConfirmPassword("");
             });
         } else {
             toast.error(state.message);
