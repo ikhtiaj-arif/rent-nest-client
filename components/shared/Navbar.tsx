@@ -57,11 +57,11 @@ const userMenuItems = [
         icon: LayoutDashboard,
         action: "dashboard",
     },
-    // {
-    //     label: "Profile",
-    //     icon: User,
-    //     action: "profile",
-    // },
+    {
+        label: "Profile",
+        icon: User,
+        action: "profile",
+    },
     // {
     //     label: "Settings",
     //     icon: Settings,

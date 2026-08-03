@@ -44,25 +44,27 @@ A modern, full-featured rental property management platform built with Next.js 1
 ## 📋 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- pnpm 8+
+- Node.js 18+
+- npm (this repo is committed with `package-lock.json`; use npm rather than pnpm/yarn to avoid lockfile drift)
+- A running instance of the `rent-nest-server` backend
 - Stripe account (for payment processing)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd rentnest
+git clone https://github.com/ikhtiaj-arif/rent-nest-client.git
+cd rent-nest-client
 
 # Install dependencies
-pnpm install
+npm install
 
 # Set up environment variables
-cp .env.development.local .env.local
+cp .env.example .env.local
+# then fill in BACKEND_API_URL / NEXT_PUBLIC_BACKEND_API_URL etc, see below
 
 # Start development server
-pnpm dev
+npm run dev
 
 # The app will be available at http://localhost:3000
 ```
@@ -71,42 +73,29 @@ pnpm dev
 
 ```bash
 # Build the application
-pnpm build
+npm run build
 
 # Start production server
-pnpm start
+npm run start
 
 # Run linting
-pnpm lint
+npm run lint
 ```
 
 ---
 
-## 🔐 Admin Credentials (Testing)
+## 🔐 Test Accounts
 
-### Primary Admin Account
-```
-Email: admin@rentnest.com
-Password: Admin@123456
-Role: ADMIN
-Permissions: Full system access
-```
+There are no pre-seeded credentials shipped with this repo. To test each
+role:
 
-### Landlord Test Account
-```
-Email: landlord@rentnest.com
-Password: Landlord@123456
-Role: LANDLORD
-Permissions: Property management, rental requests
-```
-
-### Tenant Test Account
-```
-Email: tenant@rentnest.com
-Password: Tenant@123456
-Role: TENANT
-Permissions: Browse properties, create requests, make payments
-```
+- **Tenant**: register normally via `/register` (role defaults to `TENANT`).
+- **Landlord**: register as `TENANT`, then submit a landlord request from
+  `/profile`, and approve it from an `ADMIN` account at
+  `/admin-dashboard/landlord-requests`.
+- **Admin**: admin accounts are not self-registrable through the public
+  `/auth/register` endpoint — seed one directly in the database, or via the
+  backend's seed script if one exists in `rent-nest-server`.
 
 ---
 
@@ -124,61 +113,64 @@ Permissions: Browse properties, create requests, make payments
 ## 📁 Project Structure
 
 ```
-rentnest/
+rent-nest-client/
 ├── app/
-│   ├── (publicGroup)/              # Public pages (home, properties)
-│   ├── (authGroup)/                # Auth pages (login, register)
-│   ├── (dashboardGroup)/           # Protected dashboards
-│   │   ├── dashboard/              # Tenant dashboard
-│   │   ├── landlord-dashboard/     # Landlord dashboard
-│   │   ├── admin-dashboard/        # Admin dashboard
-│   │   └── _components/            # Shared components
-│   ├── api/                        # API routes
-│   │   ├── payments/               # Payment endpoints
-│   │   └── webhooks/               # Webhook handlers
-│   ├── layout.tsx                  # Root layout
-│   └── globals.css                 # Global styles
+│   ├── (publicGroup)/               # Public pages (home, properties, about, contact)
+│   │   ├── _actions/                # Server actions (propertyActions.ts)
+│   │   ├── _components/             # SortFilter, CategoryFilter, CityFilter, PriceFilter, etc.
+│   │   └── properties/              # Listing + detail pages
+│   ├── (authGroup)/                 # Auth pages (login, register)
+│   │   └── _actions/                # authActions.ts
+│   ├── (dashboardGroup)/            # Protected dashboards
+│   │   ├── _actions/                # adminActions.ts, landlordActions.ts, tenantActions.ts
+│   │   ├── _components/             # Tables, dialogs, cards shared across dashboards
+│   │   ├── dashboard/               # Tenant dashboard
+│   │   ├── landlord-dashboard/      # Landlord dashboard
+│   │   ├── admin-dashboard/         # Admin dashboard
+│   │   └── profile/                 # Profile page + _actions/userAction.ts
+│   ├── layout.tsx                   # Root layout (mounts sonner <Toaster />)
+│   ├── error.tsx                    # Root error boundary
+│   ├── not-found.tsx                # Custom 404 page
+│   └── globals.css                  # Global styles
 ├── components/
-│   ├── ui/                         # shadcn/ui components
-│   ├── ErrorBoundary.tsx           # Error handling
-│   └── shared/                     # Shared components
+│   ├── ui/                          # shadcn/ui primitives
+│   └── shared/                      # Navbar, Footer, Home sections, DashboardSkeleton
+├── service/
+│   ├── hadleApiError.ts             # Shared server-action error → AuthState mapper
+│   ├── getMe.ts / logout.ts / refreshToken.ts
 ├── lib/
-│   ├── error-handler.ts            # Error utilities
-│   ├── stripe-client.ts            # Stripe SDK setup
-│   └── types.ts                    # TypeScript types
-├── public/                         # Static assets
-├── proxy.ts                        # Next.js middleware
+│   ├── types.ts                     # Shared TS types (Property, AuthState, ...)
+│   └── utils.ts
+├── public/                          # Static assets
+├── proxy.ts                         # Auth-aware middleware (protects dashboard routes)
 ├── package.json
 ├── tsconfig.json
-├── tailwind.config.ts
-├── next.config.mjs
+├── next.config.ts
 ├── API_INTEGRATION.md               # API documentation
-└── TESTING_GUIDE.md                # Testing guide
+└── README.md
 ```
 
 ---
 
 ## 🔑 Environment Variables
 
-Create a `.env.local` file with these variables:
+Create a `.env.local` file (start from `.env.example` in this repo):
 
 ```env
-# Stripe Configuration (Test Mode)
-STRIPE_SECRET_KEY=sk_test_your_key_here
-STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+# Server-only — used by server actions/components to call the backend
+BACKEND_API_URL=http://localhost:5000
 
-# Application URLs
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
-NEXT_PUBLIC_API_URL=http://localhost:5000
+# Exposed to the client as well (used by any client component that calls
+# the backend directly)
+NEXT_PUBLIC_BACKEND_API_URL=http://localhost:5000
 
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key
-
-# Feature Flags
-NEXT_PUBLIC_ENABLE_PAYMENT=true
-NEXT_PUBLIC_ENABLE_ADMIN_PANEL=true
+# JWT — must match the backend's secrets so refresh-token cookies validate
+JWT_ACCESS_SECRET=access-secret
+JWT_REFRESH_SECRET=refresh-secret
 ```
+
+Stripe keys, if you're testing payments, live on the `rent-nest-server`
+backend, not in this frontend — see that repo's README.
 
 ---
 
@@ -194,34 +186,38 @@ All frontend components are mapped to backend endpoints. See `API_INTEGRATION.md
 
 ```
 Authentication
-POST   /auth/login
-POST   /auth/register
-GET    /auth/me
+POST   /api/auth/login
+POST   /api/auth/register
+GET    /api/auth/me
 
 Properties
-GET    /properties?page=1&limit=12
-GET    /properties/{id}
-POST   /landlord/properties
-PUT    /landlord/properties/{id}
-DELETE /landlord/properties/{id}
+GET    /api/properties?page=1&limit=12&sort=&categoryId=&city=&minPrice=&maxPrice=
+GET    /api/properties/{id}
+GET    /api/properties/filter-options
+POST   /api/landlord/properties
+PUT    /api/landlord/properties/{id}
+DELETE /api/landlord/properties/{id}
 
 Rentals
-GET    /rentals?page=1&limit=10
-POST   /rentals
-GET    /rentals/{id}
-PUT    /landlord/rental-requests/{id}/approve
-PUT    /landlord/rental-requests/{id}/reject
+GET    /api/rentals?page=1&limit=10
+POST   /api/rentals
+GET    /api/rentals/{id}
+GET    /api/landlord/requests
+PATCH  /api/landlord/requests/{id}
 
 Payments
-GET    /payments?page=1&limit=10
-GET    /payments/{id}
-POST   /api/payments/create-checkout
-POST   /api/webhooks/stripe
+GET    /api/payments?page=1&limit=10
+GET    /api/payments/{id}
+POST   /api/payments/create
+POST   /api/payments/confirm
 
 Admin
-GET    /admin/users
-GET    /admin/properties
-GET    /admin/rentals
+GET    /api/admin/users
+PATCH  /api/admin/users/{id}
+GET    /api/admin/properties
+GET    /api/admin/rentals
+GET    /api/user/request-landlord
+PATCH  /api/user/request-landlord/{id}
 ```
 
 ---
@@ -330,8 +326,6 @@ GET    /admin/rentals
 - [ ] Test keyboard navigation
 - [ ] Verify error boundaries
 
-See `TESTING_GUIDE.md` for detailed testing instructions.
-
 ---
 
 ## 📈 Performance Metrics
@@ -390,10 +384,10 @@ vercel deploy
 
 ```bash
 # Build the application
-pnpm build
+npm run build
 
 # Start production server
-pnpm start
+npm run start
 ```
 
 ---
@@ -401,7 +395,6 @@ pnpm start
 ## 📚 Documentation
 
 - **API_INTEGRATION.md** - Complete API endpoint documentation
-- **TESTING_GUIDE.md** - Comprehensive testing guide
 - **Component Comments** - Inline documentation in components
 
 ---
@@ -442,7 +435,6 @@ The implementation includes 20+ meaningful commits covering:
 
 ### Getting Help
 - Check `API_INTEGRATION.md` for endpoint details
-- Review `TESTING_GUIDE.md` for testing procedures
 - See component comments for usage examples
 - Check console logs for error details
 
@@ -451,7 +443,7 @@ The implementation includes 20+ meaningful commits covering:
 2. **Middleware errors**: Verify JWT_SECRET is set
 3. **Database connection**: Check backend API URL
 4. **Build errors**: Clear .next folder and rebuild
-5. **TypeScript errors**: Run `pnpm tsc --noEmit` to check
+5. **TypeScript errors**: Run `npx tsc --noEmit` to check
 
 ---
 
@@ -488,10 +480,9 @@ Developed by RentNest Development Team
 
 1. **Install Dependencies**: `npm install`
 2. **Configure Environment**: Copy `.env.development.local` to `.env.local`
-3. **Start Dev Server**: `npm dev`
+3. **Start Dev Server**: `npm run dev`
 4. **Login with**: admin@rentnest.com / Admin@123456
 5. **View API Docs**: Read `API_INTEGRATION.md`
-6. **Run Tests**: See `TESTING_GUIDE.md`
 
 ---
 
@@ -517,3 +508,25 @@ Developed by RentNest Development Team
 Developed by **Ikhtiaj Arif**
 
 Frontend-focused Full-Stack Engineer specializing in scalable web applications using Next.js, TypeScript, and modern React.
+---
+
+## 📝 Phase 1 Audit Changelog
+
+Recent fixes from the ongoing code review (see `API_INTEGRATION.md` for full detail):
+
+- Fixed the properties **Sort By** and **Categories** filters, which were
+  silently ignored by the backend (`sort`/`categoryId` query params weren't
+  read at all).
+- Fixed admin **approve/reject landlord request** not refreshing the table
+  (missing cache revalidation).
+- Made `_actions` files consistent: server actions now uniformly wrap fetch
+  calls in try/catch, check `res.ok`, and revalidate the relevant cached
+  paths on success.
+- Reworked the properties filter sidebar so only "Sort By" is expanded by
+  default and the panel has an internal scroll cap, instead of every filter
+  section stacking open and making the whole sidebar scroll.
+
+This README's environment variable, project structure, and endpoint
+sections were also corrected to match what's actually in this repo (they
+previously referenced files/env vars — like a Stripe key in this frontend,
+or `TESTING_GUIDE.md` — that don't exist in the codebase).

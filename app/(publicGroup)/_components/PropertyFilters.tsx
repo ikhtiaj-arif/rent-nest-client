@@ -39,7 +39,12 @@ interface Props {
 // (mobile sheet OR desktop card — not both simultaneously).
 function FiltersContent({ categories, cities }: Props) {
     return (
-        <div className="space-y-2">
+        // Each filter renders its own single-item Accordion, so by default
+        // every section is expanded at once and the sidebar grows very tall.
+        // Only "Sort By" opens by default now (see defaultValue in each
+        // filter); the rest start collapsed, keeping the panel short and
+        // making it opt-in to scroll for the less commonly used filters.
+        <div className="divide-y divide-border">
             <SortFilter />
             <AvailabilityFilter />
             <CategoryFilter categories={categories} />
@@ -93,7 +98,7 @@ export default function PropertyFilters({
             {/* Desktop — only visible at lg and above */}
 
             {/* MODIFIED: Fixed sticky positioning and width */}
-            <Card className="sticky top-20 hidden lg:block border-border">
+            <Card className="sticky top-20 hidden max-h-[calc(100vh-6rem)] flex-col lg:flex border-border">
 
                 <CardHeader className="pb-4 border-b border-border">
 
@@ -114,7 +119,7 @@ export default function PropertyFilters({
 
                 </CardHeader>
 
-                <CardContent className="pt-4">
+                <CardContent className="min-h-0 flex-1 overflow-y-auto pt-4">
 
                     <FiltersContent
                         categories={categories}
