@@ -17,18 +17,21 @@ const PropertyByIdPage = async ({
     const { id } = await params;
     const user = await getMe();
     const result = await getPropertyById(id);
+    const currentUserId = user?.data?.profile?.id;
+    const propertyLandlordId = result?.data?.landlord?.id;
+    
+ 
 
     if (!result?.success) {
         notFound();
     }
 
     const property = result.data;
-    console.log("PropertyByIdPage", property);
 
     return (
         <section className="container mx-auto px-4 py-10 space-y-10">
 
-            <PropertyHero property={property} isAuthenticated={user?.success} />
+            <PropertyHero property={property} ownProperty={currentUserId === propertyLandlordId} isAuthenticated={user?.success} />
 
             <PropertyInfo property={property} />
 

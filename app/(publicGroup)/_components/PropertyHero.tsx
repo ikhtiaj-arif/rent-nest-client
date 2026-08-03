@@ -12,12 +12,14 @@ import RentalRequestModal from "./RentalRequestModal";
 
 interface PropertyHeroProps {
     property: Property;
-    isAuthenticated: boolean
+    isAuthenticated: boolean;
+    ownProperty: boolean;
 }
 
 export default function PropertyHero({
     property,
-    isAuthenticated
+    isAuthenticated,
+    ownProperty
 }: PropertyHeroProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
@@ -139,7 +141,7 @@ export default function PropertyHero({
                     </div>
 
                     {/* CTA */}
-                    <Button
+                    {!ownProperty && <Button
                         className="mt-auto h-12 w-full"
                         disabled={!property.isAvailable}
                         onClick={() => {
@@ -158,7 +160,7 @@ export default function PropertyHero({
                         {property.isAvailable
                             ? "Request Rental"
                             : "Currently Unavailable"}
-                    </Button>
+                    </Button>}
                 </div>
             </section>
 
