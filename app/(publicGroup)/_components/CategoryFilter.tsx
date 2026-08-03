@@ -76,7 +76,6 @@ export default function CategoryFilter({
         <Accordion
             type="single"
             collapsible
-            defaultValue="categories"
         >
             <AccordionItem value="categories">
                 <AccordionTrigger>
@@ -98,7 +97,7 @@ export default function CategoryFilter({
                         }
                     />
 
-                    <ScrollArea className="h-56 rounded-md border">
+                    <ScrollArea className="h-40 rounded-md border">
                         <div className="space-y-3 p-4">
 
                             {filteredCategories?.length ? (

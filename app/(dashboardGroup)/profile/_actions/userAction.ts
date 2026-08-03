@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 import { AuthState } from "@/lib/types";
@@ -82,6 +83,8 @@ export const updateProfileAction = async (
       };
     }
 
+    revalidatePath("/profile");
+
     return {
       success: true,
       statusCode: result.statusCode,
@@ -124,6 +127,8 @@ export const uploadProfilePictureAction = async (
         message: result.message,
       };
     }
+
+    revalidatePath("/profile");
 
     return {
       success: true,
@@ -172,6 +177,8 @@ export const changePasswordAction = async (
       };
     }
 
+    revalidatePath("/profile");
+
     return {
       success: true,
       statusCode: result.statusCode,
@@ -216,6 +223,8 @@ export const requestLandlordAction = async (
         message: result.message,
       };
     }
+
+    revalidatePath("/profile");
 
     return {
       success: true,

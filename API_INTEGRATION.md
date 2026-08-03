@@ -18,7 +18,7 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 #### Login Page
 - **File**: `app/(authGroup)/login/page.tsx`
 - **Component**: `LoginForm`
-- **Backend Endpoint**: `POST /auth/login`
+- **Backend Endpoint**: `POST /api/auth/login`
 - **Payload**:
   ```json
   {
@@ -31,7 +31,7 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 #### Register Page
 - **File**: `app/(authGroup)/register/page.tsx`
 - **Component**: `RegisterForm`
-- **Backend Endpoint**: `POST /auth/register`
+- **Backend Endpoint**: `POST /api/auth/register`
 - **Payload**:
   ```json
   {
@@ -66,7 +66,9 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 
 #### Properties Listing
 - **File**: `app/(publicGroup)/properties/page.tsx`
-- **Backend Endpoint**: `GET /properties?page=1&limit=12&city=&filter=`
+- **Backend Endpoint**: `GET /api/properties?page=1&limit=12&searchTerm=&city=&categoryId=&minPrice=&maxPrice=&isAvailable=&sort=`
+
+  `sort` accepts `newest` (default) | `oldest` | `price_asc` | `price_desc` | `rating_desc`. `categoryId` filters by category id (this is what `CategoryFilter.tsx` sends — not category name).
 - **Response**:
   ```json
   {
@@ -95,7 +97,7 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 
 #### Property Details
 - **File**: `app/(publicGroup)/properties/[id]/page.tsx`
-- **Backend Endpoint**: `GET /properties/{id}`
+- **Backend Endpoint**: `GET /api/properties/{id}`
 - **Response**: Complete property details with images, reviews, landlord info
 
 ---
@@ -116,29 +118,29 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 
 #### Rental Requests
 - **File**: `app/(dashboardGroup)/dashboard/rental-requests/page.tsx`
-- **Backend Endpoint**: `GET /rentals?page=1&limit=10&status=`
+- **Backend Endpoint**: `GET /api/rentals?page=1&limit=10`
 - **Features**: Table view, status filtering, action buttons
 
 #### Rental Request Details
 - **File**: `app/(dashboardGroup)/dashboard/rental-requests/[id]/page.tsx`
-- **Backend Endpoint**: `GET /rentals/{id}`
+- **Backend Endpoint**: `GET /api/rentals/{id}`
 - **Response**: Full rental details, timeline, landlord info
 
 #### Payments
 - **File**: `app/(dashboardGroup)/dashboard/payments/page.tsx`
-- **Backend Endpoint**: `GET /payments?page=1&limit=10&status=`
+- **Backend Endpoint**: `GET /api/payments?page=1&limit=10`
 - **Features**: Payment history, filters, download receipts
 
 #### Payment Details
 - **File**: `app/(dashboardGroup)/dashboard/payments/[id]/page.tsx`
-- **Backend Endpoint**: `GET /payments/{id}`
+- **Backend Endpoint**: `GET /api/payments/{id}`
 - **Response**: Payment details, invoice, receipt
 
 #### Payment Success
 - **File**: `app/(publicGroup)/payment-success/page.tsx`
 - **Triggered By**: Stripe's `success_url` redirect after checkout completes
 - **Query Params**: `?session_id={CHECKOUT_SESSION_ID}` (set by Stripe itself)
-- **Backend Endpoint**: `GET /payments/session/{sessionId}` — polled client-side
+- **Backend Endpoint**: `GET /api/payments/session/{sessionId}` — polled client-side
   every ~2s (via `PaymentStatusPoller`) for up to ~20s
 - **Action**: Payment confirmation is asynchronous — Stripe's webhook calls
   `POST /payments/confirm` **server-to-server**, not from this page. The
@@ -166,12 +168,12 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 
 #### Landlord Properties
 - **File**: `app/(dashboardGroup)/landlord-dashboard/properties/page.tsx`
-- **Backend Endpoint**: `GET /landlord/properties?page=1&limit=10`
+- **Backend Endpoint**: `GET /api/landlord/properties?page=1&limit=10`
 - **Features**: Create property, edit, delete, view details
 
 #### Landlord Rental Requests
 - **File**: `app/(dashboardGroup)/landlord-dashboard/rental-requests/page.tsx`
-- **Backend Endpoint**: `GET /landlord/rental-requests?status=PENDING`
+- **Backend Endpoint**: `GET /api/landlord/requests` (own properties' rental requests; approve/reject via `PATCH /api/landlord/requests/{id}`)
 - **Actions**: 
   - `PUT /landlord/rental-requests/{id}/approve`
   - `PUT /landlord/rental-requests/{id}/reject`
@@ -191,7 +193,7 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 
 #### Admin Users Management
 - **File**: `app/(dashboardGroup)/admin-dashboard/users/page.tsx`
-- **Backend Endpoint**: `GET /admin/users?page=1&limit=20&role=&status=`
+- **Backend Endpoint**: `GET /api/admin/users?page=1&limit=20`
 - **Actions**:
   - `PUT /admin/users/{id}/ban`
   - `PUT /admin/users/{id}/unban`
@@ -199,7 +201,7 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 
 #### Admin Properties Management
 - **File**: `app/(dashboardGroup)/admin-dashboard/properties/page.tsx`
-- **Backend Endpoint**: `GET /admin/properties?page=1&limit=20`
+- **Backend Endpoint**: `GET /api/admin/properties?page=1&limit=20`
 - **Actions**:
   - `PUT /admin/properties/{id}/approve`
   - `PUT /admin/properties/{id}/reject`
@@ -207,7 +209,7 @@ Frontend (Next.js 16) → Middleware (Authentication) → API Routes → Backend
 
 #### Admin Rentals Management
 - **File**: `app/(dashboardGroup)/admin-dashboard/rentals/page.tsx`
-- **Backend Endpoint**: `GET /admin/rentals?page=1&limit=20&status=`
+- **Backend Endpoint**: `GET /api/admin/rentals?page=1&limit=20`
 - **Actions**: View details, resolve disputes, manage payments
 
 ---
@@ -485,3 +487,28 @@ JWT_SECRET=your_jwt_secret_key
 - [ ] Check email notifications
 - [ ] Test error boundary with manual error
 - [ ] Verify 404 and error pages
+
+---
+
+## Changelog: Filter & Cache Fixes (Phase 1 Audit)
+
+- **Properties sort/category filters**: the properties list UI (`SortFilter.tsx`,
+  `CategoryFilter.tsx`) sends `sort` and `categoryId` query params. The backend
+  previously only read `sortBy`/`sortOrder`/`type` (category *name*), so both
+  filters were silently ignored. `GET /api/properties` and
+  `GET /api/landlord/properties` now honor `sort` and `categoryId` directly.
+- **Admin landlord-request approve/reject cache**: `getLandlordRequests`
+  fetches with the `landlord-requests` cache tag, but
+  `updateLandlordRequestAction` never invalidated it. Approving/rejecting a
+  request now calls `revalidateTag("landlord-requests", "max")` plus
+  `revalidatePath` for `/admin-dashboard/landlord-requests` and
+  `/admin-dashboard/users`, so the table updates immediately instead of
+  requiring a hard refresh.
+- **Profile mutations**: `updateProfileAction`, `uploadProfilePictureAction`,
+  `changePasswordAction`, and `requestLandlordAction` now `revalidatePath("/profile")`
+  on success for the same reason.
+- **`_actions` consistency**: `updateUserById`, `createRentalRequestAction`,
+  `createPaymentAction`, and `createReview` now follow the same
+  try/catch → `res.ok` check → `handleApiError` pattern used elsewhere
+  (e.g. `landlordActions.ts`), instead of returning `res.json()` directly
+  without checking for failure.

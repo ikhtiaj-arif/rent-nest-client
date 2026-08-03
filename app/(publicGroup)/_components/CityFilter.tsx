@@ -62,7 +62,6 @@ export default function CityFilter({
         <Accordion
             type="single"
             collapsible
-            defaultValue="cities"
         >
             <AccordionItem value="cities">
                 <AccordionTrigger>
@@ -82,7 +81,7 @@ export default function CityFilter({
                         onChange={(e) => setSearch(e.target.value)}
                     />
 
-                    <ScrollArea className="h-56 rounded-md border">
+                    <ScrollArea className="h-40 rounded-md border">
                         <div className="space-y-3 p-4">
 
                             {filteredCities?.length ? (

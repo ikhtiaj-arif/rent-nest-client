@@ -1,6 +1,8 @@
 "use server";
 
 import { AuthState } from "@/lib/types";
+import { handleApiError } from "@/service/hadleApiError";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 const getAuthHeaders = async () => {
@@ -114,73 +116,126 @@ export const createRentalRequestAction = async (
   _prevState: AuthState,
   formData: FormData,
 ): Promise<AuthState> => {
-  const headers = await getAuthHeaders();
+  try {
+    const headers = await getAuthHeaders();
 
-  const payload = {
-    moveInDate: new Date(formData.get("moveInDate") as string).toISOString(),
-    propertyId: formData.get("propertyId"),
-  };
+    const payload = {
+      moveInDate: new Date(
+        formData.get("moveInDate") as string,
+      ).toISOString(),
+      propertyId: formData.get("propertyId"),
+    };
 
-  console.log("payload", payload);
-  const res = await fetch(`${process.env.BACKEND_API_URL}/api/rentals`, {
-    method: "POST",
-    headers: {
-      ...headers,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  return await res.json();
-};
-
-
-export const createPaymentAction = async (
-  rentalRequestId: string,
-) => {
-  const headers = await getAuthHeaders();
-
-  const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/payments/create`,
-    {
-      method: "POST",
-      headers: {
-        ...headers,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        rentalRequestId,
-      }),
-    }
-  );
-
-  return res.json();
-};
-
-export async function createReview(
-  prevState: AuthState,
-  formData: FormData,
-): Promise<AuthState> {
-  const headers = await getAuthHeaders();
-
-  const payload = {
-    rating: Number(formData.get("rating")),
-    comment: formData.get("comment"),
-    propertyId: formData.get("propertyId"),
-    rentalRequestId: formData.get("rentalRequestId"),
-  };
-
-  const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/reviews`,
-    {
+    const res = await fetch(`${process.env.BACKEND_API_URL}/api/rentals`, {
       method: "POST",
       headers: {
         ...headers,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
-    }
-  );
+    });
 
-  return res.json();
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message ?? "Failed to submit rental request.",
+      };
+    }
+
+    revalidatePath("/dashboard/rental-requests");
+
+    return {
+      success: true,
+      statusCode: result.statusCode,
+      message: result.message ?? "Rental request submitted successfully.",
+      data: result.data,
+    };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+
+export const createPaymentAction = async (rentalRequestId: string) => {
+  try {
+    const headers = await getAuthHeaders();
+
+    const res = await fetch(
+      `${process.env.BACKEND_API_URL}/api/payments/create`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          rentalRequestId,
+        }),
+      },
+    );
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message ?? "Failed to start payment.",
+      };
+    }
+
+    return result;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export async function createReview(
+  prevState: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  try {
+    const headers = await getAuthHeaders();
+
+    const payload = {
+      rating: Number(formData.get("rating")),
+      comment: formData.get("comment"),
+      propertyId: formData.get("propertyId"),
+      rentalRequestId: formData.get("rentalRequestId"),
+    };
+
+    const res = await fetch(`${process.env.BACKEND_API_URL}/api/reviews`, {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message ?? "Failed to submit review.",
+      };
+    }
+
+    revalidatePath("/dashboard/rental-requests");
+    revalidatePath(`/properties/${payload.propertyId}`);
+
+    return {
+      success: true,
+      statusCode: result.statusCode,
+      message: result.message ?? "Review submitted successfully.",
+      data: result.data,
+    };
+  } catch (error) {
+    return handleApiError(error);
+  }
 }
