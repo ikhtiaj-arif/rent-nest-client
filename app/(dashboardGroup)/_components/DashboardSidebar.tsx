@@ -8,31 +8,30 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger
+  SidebarMenuItem
 } from "@/components/ui/sidebar";
- 
+
 import { Building2, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
- 
-import { ISidebarItem, NavbarProps } from "@/lib/types";
-import { sidebarMenuItems } from "../_config/SidebarMenuItems";
-import { logout } from "@/service/logout";
+
 import { Button } from "@/components/ui/button";
+import { ISidebarItem, NavbarProps } from "@/lib/types";
+import { logout } from "@/service/logout";
+import { sidebarMenuItems } from "../_config/SidebarMenuItems";
 
 // MODIFIED: Added responsiveness, header, and logout functionality
-export default function DashboardSidebar({user} : NavbarProps) {
+export default function DashboardSidebar({ user }: NavbarProps) {
   const pathname = usePathname();
 
-  let navItems : ISidebarItem[]  = [];
+  let navItems: ISidebarItem[] = [];
 
-  if(user.data.profile.role === "TENANT"){
-    navItems=sidebarMenuItems.TENANT
-  }else if (user.data.profile.role === "LANDLORD") {
-     navItems = sidebarMenuItems.LANDLORD;
-  }else if (user.data.profile.role === "ADMIN") {
-     navItems = sidebarMenuItems.ADMIN;
+  if (user?.data?.profile?.role === "TENANT") {
+    navItems = sidebarMenuItems.TENANT
+  } else if (user?.data?.profile?.role === "LANDLORD") {
+    navItems = sidebarMenuItems.LANDLORD;
+  } else if (user?.data?.profile?.role === "ADMIN") {
+    navItems = sidebarMenuItems.ADMIN;
   }
 
   return (
@@ -50,7 +49,7 @@ export default function DashboardSidebar({user} : NavbarProps) {
               RentNest
             </span>
             <span className="text-xs text-sidebar-foreground/70 truncate">
-              {user.data.profile.role}
+              {user?.data?.profile?.role}
             </span>
           </div>
         </div>
@@ -82,9 +81,9 @@ export default function DashboardSidebar({user} : NavbarProps) {
       {/* Footer with Logout */}
       <div className="p-4 border-t border-sidebar-border">
         <form action={logout}>
-          <Button 
-            type="submit" 
-            variant="outline" 
+          <Button
+            type="submit"
+            variant="outline"
             className="w-full justify-start gap-2"
           >
             <LogOut className="w-4 h-4" />

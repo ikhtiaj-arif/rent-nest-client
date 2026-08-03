@@ -1,6 +1,8 @@
 "use server";
 
 import { AuthState } from "@/lib/types";
+import { handleApiError } from "@/service/hadleApiError";
+import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 const getAuthHeaders = async () => {
@@ -118,13 +120,10 @@ export const getAllRentals = async ({
 export const getRentalById = async (id: string) => {
   const headers = await getAuthHeaders();
 
-  const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/rentals/${id}`,
-    {
-      headers,
-      cache: "no-store",
-    },
-  );
+  const res = await fetch(`${process.env.BACKEND_API_URL}/api/rentals/${id}`, {
+    headers,
+    cache: "no-store",
+  });
 
   return res.json();
 };
@@ -140,10 +139,13 @@ export const getAdminDashboardStats = async () => {
         headers,
         cache: "no-store",
       }).then((r) => r.json()),
-      fetch(`${process.env.BACKEND_API_URL}/api/admin/properties?page=1&limit=1`, {
-        headers,
-        cache: "no-store",
-      }).then((r) => r.json()),
+      fetch(
+        `${process.env.BACKEND_API_URL}/api/admin/properties?page=1&limit=1`,
+        {
+          headers,
+          cache: "no-store",
+        },
+      ).then((r) => r.json()),
       fetch(`${process.env.BACKEND_API_URL}/api/admin/rentals?page=1&limit=1`, {
         headers,
         cache: "no-store",
@@ -164,5 +166,81 @@ export const getAdminDashboardStats = async () => {
       success: false,
       error: "Failed to fetch dashboard statistics",
     };
+  }
+};
+
+
+
+export const getLandlordRequests = async () => {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+
+    const res = await fetch(
+      `${process.env.BACKEND_API_URL}/api/user/request-landlord`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      cache: "no-store",
+        next: {
+          tags: ["landlord-requests"],
+        },
+      },
+    );
+
+    return await res.json();
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const updateLandlordRequestAction = async (
+  requestId: string,
+  prevState: AuthState,
+  formData: FormData,
+): Promise<AuthState> => {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+
+    const payload = {
+      requestId: formData.get("requestId"),
+      status: formData.get("status"),
+      rejectionReason: formData.get("rejectionReason"),
+    };
+
+    const res = await fetch(
+      `${process.env.BACKEND_API_URL}/api/user/request-landlord/${requestId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message,
+      };
+    }
+
+    
+
+    return {
+      success: true,
+      statusCode: result.statusCode,
+      message: result.message,
+      data: result.data,
+    };
+  } catch (error) {
+    return handleApiError(error);
   }
 };
