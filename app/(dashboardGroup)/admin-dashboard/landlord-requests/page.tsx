@@ -1,7 +1,7 @@
 "use server"
 
 import { getLandlordRequests } from "../../_actions/adminActions";
-import LandlordRequestTable from "../../_components/LandlordRequestTable";
+ 
  
 
 
@@ -27,9 +27,9 @@ const LandlordRequestsPage = async () => {
                     No pending requests.
                 </div>
             ) : (
-
-                <LandlordRequestTable
-                    requests={requests} />
+<></>
+                // <LandlordRequestTable
+                //     requests={requests} />
 
             )}
         </div>
