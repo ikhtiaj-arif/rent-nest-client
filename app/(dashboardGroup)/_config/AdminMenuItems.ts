@@ -22,4 +22,9 @@ export const ADMIN_SIDEBAR_ITEMS: ISidebarItem[] = [
         href : "/admin-dashboard/rentals",
         icon : TriangleAlertIcon
     },
+    {
+        label : "Landlord Requests",
+        href : "/admin-dashboard/landlord-requests",
+        icon : TriangleAlertIcon
+    },
 ]

@@ -118,7 +118,7 @@ export default function LandlordRequestCard({
                         </div>
                     )}
 
-                    <form action={formAction} className="space-y-4">
+                    {/* <form action={formAction} className="space-y-4">
                         <div className="space-y-2">
                             <Label>Request Again</Label>
 
@@ -132,7 +132,7 @@ export default function LandlordRequestCard({
                         <Button type="submit" disabled={pending}>
                             {pending ? "Submitting..." : "Submit Request"}
                         </Button>
-                    </form>
+                    </form> */}
                 </CardContent>
             </Card>
         );
