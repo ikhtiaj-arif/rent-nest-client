@@ -1,8 +1,7 @@
-
+"use server"
 
 import { getLandlordRequests } from "../../_actions/adminActions";
 import LandlordRequestTable from "../../_components/LandlordRequestTable";
-
 
 
 const LandlordRequestsPage = async () => {
@@ -22,14 +21,13 @@ const LandlordRequestsPage = async () => {
                 </p>
             </div>
 
-            {requests.length === 0 ? (
+            {requests?.length === 0 ? (
                 <div className="rounded-lg border p-12 text-center text-muted-foreground">
                     No pending requests.
                 </div>
             ) : (
 
                 <LandlordRequestTable
-
                     requests={requests} />
 
             )}

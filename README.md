@@ -222,7 +222,7 @@ PATCH  /api/user/request-landlord/{id}
 
 ---
 
-## ❌ Error Handling
+##  Error Handling
 
 ### Implemented Strategies
 
