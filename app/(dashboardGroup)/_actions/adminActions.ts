@@ -2,7 +2,7 @@
 
 import { AuthState } from "@/lib/types";
 import { handleApiError } from "@/service/hadleApiError";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 const getAuthHeaders = async () => {
@@ -59,21 +59,42 @@ export const updateUserById = async (
   userId: string,
   payload: Record<string, unknown>,
 ): Promise<AuthState> => {
-  const headers = await getAuthHeaders();
+  try {
+    const headers = await getAuthHeaders();
 
-  const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/admin/users/${userId}`,
-    {
-      method: "PATCH",
-      headers: {
-        ...headers,
-        "Content-Type": "application/json",
+    const res = await fetch(
+      `${process.env.BACKEND_API_URL}/api/admin/users/${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    },
-  );
+    );
 
-  return res.json();
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      return {
+        success: false,
+        statusCode: result.statusCode ?? res.status,
+        message: result.message ?? "Failed to update user.",
+      };
+    }
+
+    revalidatePath("/admin-dashboard/users");
+
+    return {
+      success: true,
+      statusCode: result.statusCode,
+      message: result.message,
+      data: result.data,
+    };
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
 
 // Get all properties with pagination and filtering
@@ -232,7 +253,14 @@ export const updateLandlordRequestAction = async (
       };
     }
 
-    
+    // Without this, the landlord-requests table (fetched with the
+    // "landlord-requests" cache tag) keeps serving the stale cached list,
+    // so approved/rejected requests don't disappear/update until a hard
+    // refresh. Also revalidate the admin users list since approving a
+    // landlord request changes the underlying user's role.
+    revalidateTag("landlord-requests", "max");
+    revalidatePath("/admin-dashboard/landlord-requests");
+    revalidatePath("/admin-dashboard/users");
 
     return {
       success: true,

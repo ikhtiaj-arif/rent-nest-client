@@ -57,7 +57,7 @@ export default function PriceFilter() {
     }, [minPrice, maxPrice]);
 
     return (
-        <Accordion type="single" collapsible defaultValue="price">
+        <Accordion type="single" collapsible>
             <AccordionItem value="price">
                 <AccordionTrigger>
                     Monthly Rent

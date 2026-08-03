@@ -62,7 +62,6 @@ export default function AvailabilityFilter() {
         <Accordion
             type="single"
             collapsible
-            defaultValue="availability"
         >
             <AccordionItem value="availability">
                 <AccordionTrigger>
