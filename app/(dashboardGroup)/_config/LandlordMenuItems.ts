@@ -1,5 +1,5 @@
 import { ISidebarItem } from "@/lib/types";
-import { House, LayoutDashboard, TriangleAlertIcon } from "lucide-react";
+import { ClipboardList, Home, LayoutDashboard } from "lucide-react";
 
 export const LANDLORD_SIDEBAR_ITEMS: ISidebarItem[] = [
   {
@@ -10,11 +10,11 @@ export const LANDLORD_SIDEBAR_ITEMS: ISidebarItem[] = [
   {
     label: "My Properties",
     href: "/landlord-dashboard/properties",
-    icon: House,
+    icon: Home,
   },
   {
     label: "Rental Requests",
     href: "/landlord-dashboard/rental-requests",
-    icon: TriangleAlertIcon,
+    icon: ClipboardList,
   },
 ];

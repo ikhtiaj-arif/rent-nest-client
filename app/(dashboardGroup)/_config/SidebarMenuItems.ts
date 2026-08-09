@@ -1,5 +1,5 @@
 import { ISidebarItem } from "@/lib/types";
-import { Currency, DollarSign, FileText, LayoutDashboard, TriangleAlertIcon } from "lucide-react";
+import { ClipboardList, CreditCard, LayoutDashboard } from "lucide-react";
 import { ADMIN_SIDEBAR_ITEMS } from "./AdminMenuItems";
 import { LANDLORD_SIDEBAR_ITEMS } from "./LandlordMenuItems";
 
@@ -12,12 +12,12 @@ const TENANT_SIDEBAR_ITEMS: ISidebarItem[] = [
   {
     label: "My Rental Requests",
     href: "/dashboard/rental-requests",
-    icon: TriangleAlertIcon,
+    icon: ClipboardList,
   },
   {
     label: "My Payments",
     href: "/dashboard/payments",
-    icon: Currency,
+    icon: CreditCard,
   },
 ];
 

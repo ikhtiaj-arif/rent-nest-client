@@ -1,7 +1,6 @@
 import { getAllUsers } from "../../_actions/adminActions";
 import AdminUsersTable from "../../_components/AdminUsersTable";
-
- 
+import { PageHeader } from "@/components/shared/PageHeader";
 
 interface Props {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -24,13 +23,11 @@ export default async function AdminDashboardUsersPage({
   const meta = res?.data?.meta;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Users</h1>
-        <p className="text-muted-foreground">
-          Manage tenants, landlords and admins.
-        </p>
-      </div>
+    <div className="space-y-6 animate-fade-in-up">
+      <PageHeader
+        title="User Management"
+        description="View and manage all registered users on the platform."
+      />
 
       <AdminUsersTable
         users={users}

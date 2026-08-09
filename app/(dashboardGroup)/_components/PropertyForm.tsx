@@ -143,7 +143,6 @@ export default function PropertyForm({
     };
 
 
-    console.log("furnished", property);
 
 
     return (

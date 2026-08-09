@@ -3,7 +3,7 @@ import { getMe } from "@/service/getMe";
 import { getLandlordOwnProperties } from "../../_actions/landlordActions";
 import PropertiesTable from "../../_components/PropertiesTable";
 import PropertyForm from "../../_components/PropertyForm";
-
+import { PageHeader } from "@/components/shared/PageHeader";
 
 
 const LandlordPropertiesPage = async ({
@@ -21,21 +21,11 @@ const LandlordPropertiesPage = async ({
     
 
     return (
-        <section className="space-y-6">
+        <section className="space-y-6 animate-fade-in-up">
 
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">
-                        My Properties
-                    </h1>
-
-                    <p className="text-muted-foreground">
-                        Manage your rental listings.
-                    </p>
-                </div>
-
+            <PageHeader title="My Properties" description="Manage your listed properties and create new ones.">
                 <PropertyForm mode="create" />
-            </div>
+            </PageHeader>
 
             <PropertiesTable
                 properties={properties}

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import PropertyPagination from "@/app/(publicGroup)/_components/PropertyPagination";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import {
     Card,
@@ -42,13 +43,8 @@ export default async function AdminDashboardRentalsPage({
     const meta = res?.data?.meta;
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold">Rental Requests</h1>
-                <p className="text-muted-foreground">
-                    View all rental requests across the platform.
-                </p>
-            </div>
+        <div className="space-y-6 animate-fade-in-up">
+            <PageHeader title="Rental Management" description="Monitor all rental requests and their statuses." />
 
             <Card>
                 <CardHeader>

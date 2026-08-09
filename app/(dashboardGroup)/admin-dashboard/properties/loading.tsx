@@ -1,5 +1,5 @@
-import { DashboardSkeleton } from "@/components/shared/DashboardSkeleton";
+import TableSkeleton from "../users/loading";
 
 export default function AdminPropertiesLoading() {
-    return <DashboardSkeleton statCount={0} rowCount={8} />;
+  return <TableSkeleton />;
 }

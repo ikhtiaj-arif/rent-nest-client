@@ -2,6 +2,7 @@
 
 import { getLandlordRequests } from "../../_actions/adminActions";
 import LandlordRentalRequestsTable from "../../_components/LandlordRentalRequestsTable";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 
 
@@ -13,16 +14,8 @@ const LandlordRequestsPage = async () => {
  
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold">
-                    Landlord Requests
-                </h1>
-
-                <p className="text-muted-foreground">
-                    Review tenant requests to become landlords.
-                </p>
-            </div>
+        <div className="space-y-6 animate-fade-in-up">
+            <PageHeader title="Landlord Requests" description="Review and manage landlord registration requests." />
 
             {requests?.length === 0 ? (
                 <div className="rounded-lg border p-12 text-center text-muted-foreground">

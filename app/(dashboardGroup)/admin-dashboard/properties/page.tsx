@@ -1,7 +1,7 @@
 import { getAllProperties } from "../../_actions/adminActions";
 import PropertiesTable from "../../_components/PropertiesTable";
 import AdminPropertiesTable from "../../_components/PropertiesTable";
-
+import { PageHeader } from "@/components/shared/PageHeader";
 
 
 interface Props {
@@ -25,13 +25,8 @@ export default async function AdminDashboardPropertiesPage({
     const meta = res?.data?.meta;
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold">Properties</h1>
-                <p className="text-muted-foreground">
-                    View all properties across the platform.
-                </p>
-            </div>
+        <div className="space-y-6 animate-fade-in-up">
+            <PageHeader title="All Properties" description="Browse and manage all property listings across the platform." />
 
             <PropertiesTable
                 properties={properties}

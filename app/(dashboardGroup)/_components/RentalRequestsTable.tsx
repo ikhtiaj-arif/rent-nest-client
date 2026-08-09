@@ -2,9 +2,19 @@
 
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
+import { FileText } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 import { AuthState } from "@/lib/types";
 import { updateRentalRequestStatus } from "../_actions/landlordActions";
@@ -13,12 +23,12 @@ import EndRentalDialog from "./EndRentalDialog";
 export interface RentalRequest {
   id: string;
   status:
-  | "PENDING"
-  | "APPROVED"
-  | "REJECTED"
-  | "ACTIVE"
-  | "COMPLETED"
-  | "CANCELLED";
+    | "PENDING"
+    | "APPROVED"
+    | "REJECTED"
+    | "ACTIVE"
+    | "COMPLETED"
+    | "CANCELLED";
   moveInDate: string;
   tenant: {
     id: string;
@@ -87,84 +97,65 @@ export default function RentalRequestsTable({
 }) {
   if (!requests.length) {
     return (
-      <div className="rounded-lg border p-12 text-center text-muted-foreground">
-        No rental requests found.
-      </div>
+      <EmptyState
+        icon={FileText}
+        title="No rental requests found"
+        description="There are currently no rental requests to display."
+      />
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
-      <table className="w-full">
-        <thead className="bg-muted/50">
-          <tr className="text-left">
-            <th className="px-6 py-4 font-medium">Tenant</th>
-            <th className="px-6 py-4 font-medium">Property</th>
-            <th className="px-6 py-4 font-medium">Move In</th>
-            <th className="px-6 py-4 font-medium">Status</th>
-            <th className="px-6 py-4 font-medium text-right">Action</th>
-          </tr>
-        </thead>
+    <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-xs">
+      <Table>
+        <TableHeader className="bg-muted/40">
+          <TableRow>
+            <TableHead>Tenant</TableHead>
+            <TableHead className="hidden md:table-cell">Contact</TableHead>
+            <TableHead>Property</TableHead>
+            <TableHead>Move In</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Action</TableHead>
+          </TableRow>
+        </TableHeader>
 
-        <tbody>
+        <TableBody>
           {requests.map((request) => {
-
-            // console.log(request);
             return (
-              <tr
+              <TableRow
                 key={request.id}
-                className="border-t hover:bg-muted/40 transition-colors"
+                className="hover:bg-muted/30 transition-colors"
               >
-                <td className="px-6 py-4">
-                  <div>
-                    <p className="font-medium">{request.tenant.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {request.tenant.email}
-                    </p>
-                  </div>
-                </td>
+                <TableCell>
+                  <p className="font-medium">{request.tenant.name}</p>
+                </TableCell>
+                
+                <TableCell className="hidden md:table-cell">
+                  <p className="text-sm text-muted-foreground">
+                    {request.tenant.email}
+                  </p>
+                </TableCell>
 
-                <td className="px-6 py-4">
+                <TableCell>
                   <p className="font-medium">{request.property.title}</p>
                   <p className="text-sm text-muted-foreground">
                     {request.property.city}
                   </p>
-                </td>
+                </TableCell>
 
-                <td className="px-6 py-4">
+                <TableCell>
                   {new Date(request.moveInDate).toLocaleDateString()}
-                </td>
+                </TableCell>
 
-                <td className="px-6 py-4">
-                  <Badge
-                    variant={
-                      request.status === "ACTIVE"
-                        ? "default"
-                        : request.status === "PENDING"
-                          ? "secondary"
-                          : request.status === "REJECTED"
-                            ? "destructive"
-                            : request.status === "COMPLETED"
-                              ? "outline"
-                              : "secondary"
-                    }
-                  >
-                    {request.status}
-                  </Badge>
-                </td>
+                <TableCell>
+                  <StatusBadge status={request.status} />
+                </TableCell>
 
-                <td className="px-6 py-4">
+                <TableCell>
                   {request.status === "PENDING" ? (
                     <div className="flex justify-end gap-2">
-                      <UpdateButton
-                        id={request.id}
-                        status="APPROVED"
-                      />
-
-                      <UpdateButton
-                        id={request.id}
-                        status="REJECTED"
-                      />
+                      <UpdateButton id={request.id} status="APPROVED" />
+                      <UpdateButton id={request.id} status="REJECTED" />
                     </div>
                   ) : request.status === "ACTIVE" && request.property.onRent ? (
                     <div className="flex justify-end">
@@ -173,14 +164,14 @@ export default function RentalRequestsTable({
                   ) : (
                     <div className="text-right text-sm text-muted-foreground">
                       —
-                    </div>)}
-
-                </td>
-              </tr>
-            )
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { getLandlordRentalRequests } from "../../_actions/landlordActions";
 import RentalRequestsTable from "../../_components/RentalRequestsTable";
+import { PageHeader } from "@/components/shared/PageHeader";
 
  
 
@@ -10,13 +11,8 @@ export default async function RentalRequestsPage() {
   const total = res.data?.meta?.total ?? 0;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Rental Requests</h1>
-        <p className="text-muted-foreground mt-1">
-          Review and manage tenant rental requests.
-        </p>
-      </div>
+    <div className="space-y-6 animate-fade-in-up">
+      <PageHeader title="Rental Requests" description="Review incoming rental requests from tenants." />
 
       <div className="rounded-lg border bg-card px-4 py-3">
         <p className="text-sm text-muted-foreground">

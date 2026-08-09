@@ -5,15 +5,15 @@ import {
     LayoutDashboard,
     LogOut,
     Menu,
-    User
+    User as UserIcon
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useState } from "react";
 
 import { NavbarProps } from "@/lib/types";
-
-
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -34,6 +34,8 @@ import {
 import {
     Sheet,
     SheetContent,
+    SheetHeader,
+    SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { logout } from "@/service/logout";
@@ -47,6 +49,7 @@ const navItems = [
 ];
 
 const dashboardRoutes = {
+    TENANT: "/dashboard",
     USER: "/dashboard",
     LANDLORD: "/landlord-dashboard",
     ADMIN: "/admin-dashboard",
@@ -60,96 +63,82 @@ const userMenuItems = [
     },
     {
         label: "Profile",
-        icon: User,
+        icon: UserIcon,
         action: "profile",
     },
-    // {
-    //     label: "Settings",
-    //     icon: Settings,
-    //     action: "settings",
-    // },
 ];
 
 export function Navbar({ user }: NavbarProps) {
     const pathname = usePathname();
     const router = useRouter();
-    const profilePicture = user.data?.profile.profilePicture;
-
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const profilePicture = user.data?.profile?.profilePicture;
+    const userName = user.data?.profile?.name || "User";
+    const userInitial = userName.charAt(0).toUpperCase();
 
     const handleUserMenuAction = async (action: string) => {
+        setMobileOpen(false);
         switch (action) {
             case "dashboard": {
-                const role = user.data?.profile.role as keyof typeof dashboardRoutes;
-
+                const role = user.data?.profile?.role as keyof typeof dashboardRoutes;
                 router.push(dashboardRoutes[role] ?? "/dashboard");
                 break;
             }
 
             case "logout": {
                 await logout();
-
                 toast.success("Logged out successfully.");
-
                 router.replace("/login");
-
                 router.refresh();
-
                 break;
             }
 
             case "profile":
                 router.push("/profile");
                 break;
-
-            case "settings":
-                router.push("/settings");
-                break;
         }
     };
 
     return (
-        <header className="sticky top-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
-
                 {/* Logo */}
-
                 <Link
                     href="/"
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
                 >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
                         <Building2 className="h-5 w-5" />
                     </div>
-
                     <div>
-                        <p className="text-lg font-bold tracking-tight">
+                        <p className="text-base font-bold tracking-tight text-foreground leading-none">
                             RentNest
                         </p>
-
-                        <p className="-mt-1 text-xs text-muted-foreground">
-                            Smart Rental Platform
+                        <p className="text-[10px] text-muted-foreground font-medium mt-0.5">
+                            Property Platform
                         </p>
                     </div>
                 </Link>
 
                 {/* Desktop Navigation */}
-
                 <NavigationMenu className="hidden md:flex">
-                    <NavigationMenuList>
+                    <NavigationMenuList className="gap-1">
                         {navItems.map((item) => {
                             const active =
-                                pathname === item.href ||
-                                pathname.startsWith(item.href + "/");
+                                item.href === "/"
+                                    ? pathname === "/"
+                                    : pathname.startsWith(item.href);
 
                             return (
                                 <NavigationMenuItem key={item.href}>
                                     <NavigationMenuLink asChild>
                                         <Link
                                             href={item.href}
-                                            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${active
-                                                ? "bg-accent text-accent-foreground"
-                                                : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                                                }`}
+                                            className={`relative rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
+                                                active
+                                                    ? "bg-accent text-accent-foreground font-semibold"
+                                                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                                            }`}
                                         >
                                             {item.label}
                                         </Link>
@@ -161,40 +150,37 @@ export function Navbar({ user }: NavbarProps) {
                 </NavigationMenu>
 
                 {/* Desktop Right */}
-
                 <div className="hidden items-center gap-2 md:flex">
+                    <ThemeToggle />
+
                     {user.success ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="rounded-full outline-none ring-offset-background transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring">
+                                <button className="flex items-center gap-2 rounded-full p-0.5 outline-none ring-offset-background transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring">
                                     {profilePicture ? (
                                         <Image
                                             src={profilePicture}
-                                            alt={user.data?.profile.name}
-                                            width={35}
-                                            height={35}
-                                            className="h-9 w-9 rounded-full object-cover"
+                                            alt={userName}
+                                            width={36}
+                                            height={36}
+                                            className="h-9 w-9 rounded-full object-cover border border-border"
                                         />
                                     ) : (
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                                            <User className="h-5 w-5 text-primary" />
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm border border-primary/20">
+                                            {userInitial}
                                         </div>
                                     )}
                                 </button>
                             </DropdownMenuTrigger>
 
-                            <DropdownMenuContent
-                                align="end"
-                                className="w-60"
-                            >
+                            <DropdownMenuContent align="end" className="w-56">
                                 <DropdownMenuLabel>
-                                    <div className="space-y-1">
-                                        <p className="font-medium">
-                                            {user.data?.profile.name}
+                                    <div className="space-y-0.5">
+                                        <p className="font-semibold text-sm truncate">
+                                            {userName}
                                         </p>
-
-                                        <p className="text-xs text-muted-foreground">
-                                            {user.data?.profile.email}
+                                        <p className="text-xs text-muted-foreground truncate font-normal">
+                                            {user.data?.profile?.email}
                                         </p>
                                     </div>
                                 </DropdownMenuLabel>
@@ -203,13 +189,13 @@ export function Navbar({ user }: NavbarProps) {
 
                                 {userMenuItems.map((item) => {
                                     const Icon = item.icon;
-
                                     return (
                                         <DropdownMenuItem
                                             key={item.action}
                                             onClick={() =>
                                                 handleUserMenuAction(item.action)
                                             }
+                                            className="cursor-pointer"
                                         >
                                             <Icon className="mr-2 h-4 w-4" />
                                             {item.label}
@@ -224,6 +210,7 @@ export function Navbar({ user }: NavbarProps) {
                                         handleUserMenuAction("logout")
                                     }
                                     variant="destructive"
+                                    className="cursor-pointer"
                                 >
                                     <LogOut className="mr-2 h-4 w-4" />
                                     Log out
@@ -231,128 +218,124 @@ export function Navbar({ user }: NavbarProps) {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <>
-                            <Button
-                                variant="ghost"
-                                asChild
-                            >
-                                <Link href="/login">
-                                    Login
-                                </Link>
+                        <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link href="/login">Login</Link>
                             </Button>
-
-                            <Button asChild>
-                                <Link href="/register">
-                                    Get Started
-                                </Link>
+                            <Button size="sm" asChild>
+                                <Link href="/register">Get Started</Link>
                             </Button>
-                        </>
+                        </div>
                     )}
                 </div>
 
-                {/* Mobile */}
+                {/* Mobile Right Controls */}
+                <div className="flex items-center gap-1 md:hidden">
+                    <ThemeToggle />
 
-                <Sheet>
-                    <SheetTrigger asChild>
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="md:hidden"
-                        >
-                            <Menu className="h-5 w-5" />
-                        </Button>
-                    </SheetTrigger>
+                    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                        <SheetTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-9 w-9">
+                                <Menu className="h-5 w-5" />
+                                <span className="sr-only">Toggle Menu</span>
+                            </Button>
+                        </SheetTrigger>
 
-                    <SheetContent className="w-80">
-                        <div className="mt-8 flex flex-col gap-2">
+                        <SheetContent side="right" className="w-72 sm:w-80">
+                            <SheetHeader className="pb-4 border-b">
+                                <SheetTitle className="flex items-center gap-2">
+                                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                                        <Building2 className="h-4 w-4" />
+                                    </div>
+                                    <span className="font-bold">RentNest</span>
+                                </SheetTitle>
+                            </SheetHeader>
 
-                            {navItems.map((item) => {
-                                const active =
-                                    pathname === item.href ||
-                                    pathname.startsWith(item.href + "/");
+                            <div className="py-6 flex flex-col gap-1.5">
+                                {navItems.map((item) => {
+                                    const active =
+                                        item.href === "/"
+                                            ? pathname === "/"
+                                            : pathname.startsWith(item.href);
 
-                                return (
-                                    <Button
-                                        key={item.href}
-                                        asChild
-                                        variant={active ? "secondary" : "ghost"}
-                                        className="justify-start"
-                                    >
-                                        <Link href={item.href}>
-                                            {item.label}
-                                        </Link>
-                                    </Button>
-                                );
-                            })}
+                                    return (
+                                        <Button
+                                            key={item.href}
+                                            asChild
+                                            variant={active ? "secondary" : "ghost"}
+                                            className="justify-start text-sm font-medium"
+                                            onClick={() => setMobileOpen(false)}
+                                        >
+                                            <Link href={item.href}>{item.label}</Link>
+                                        </Button>
+                                    );
+                                })}
 
-                            <div className="mt-6 border-t pt-6">
-                                {user.success ? (
-                                    <div className="space-y-2">
-                                        <div className="pb-4">
-                                            <p className="font-medium">
-                                                {user.data?.profile.name}
-                                            </p>
+                                <div className="mt-6 border-t pt-6">
+                                    {user.success ? (
+                                        <div className="space-y-3">
+                                            <div className="px-2 pb-2">
+                                                <p className="font-semibold text-sm">
+                                                    {userName}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground truncate">
+                                                    {user.data?.profile?.email}
+                                                </p>
+                                            </div>
 
-                                            <p className="text-sm text-muted-foreground">
-                                                {user.data?.profile.email}
-                                            </p>
+                                            {userMenuItems.map((item) => {
+                                                const Icon = item.icon;
+                                                return (
+                                                    <Button
+                                                        key={item.action}
+                                                        variant="outline"
+                                                        className="w-full justify-start"
+                                                        onClick={() =>
+                                                            handleUserMenuAction(item.action)
+                                                        }
+                                                    >
+                                                        <Icon className="mr-2 h-4 w-4" />
+                                                        {item.label}
+                                                    </Button>
+                                                );
+                                            })}
+
+                                            <Button
+                                                variant="destructive"
+                                                className="w-full justify-start"
+                                                onClick={() =>
+                                                    handleUserMenuAction("logout")
+                                                }
+                                            >
+                                                <LogOut className="mr-2 h-4 w-4" />
+                                                Log out
+                                            </Button>
                                         </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <Button
+                                                variant="outline"
+                                                className="w-full"
+                                                asChild
+                                                onClick={() => setMobileOpen(false)}
+                                            >
+                                                <Link href="/login">Login</Link>
+                                            </Button>
 
-                                        {userMenuItems.map((item) => {
-                                            const Icon = item.icon;
-
-                                            return (
-                                                <Button
-                                                    key={item.action}
-                                                    variant="ghost"
-                                                    className="w-full justify-start"
-                                                    onClick={() =>
-                                                        handleUserMenuAction(item.action)
-                                                    }
-                                                >
-                                                    <Icon className="mr-2 h-4 w-4" />
-                                                    {item.label}
-                                                </Button>
-                                            );
-                                        })}
-
-                                        <Button
-                                            variant="destructive"
-                                            className="w-full"
-                                            onClick={() =>
-                                                handleUserMenuAction("logout")
-                                            }
-                                        >
-                                            <LogOut className="mr-2 h-4 w-4" />
-                                            Log out
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <Button
-                                            variant="outline"
-                                            className="w-full"
-                                            asChild
-                                        >
-                                            <Link href="/login">
-                                                Login
-                                            </Link>
-                                        </Button>
-
-                                        <Button
-                                            className="w-full"
-                                            asChild
-                                        >
-                                            <Link href="/register">
-                                                Create Account
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                )}
+                                            <Button
+                                                className="w-full"
+                                                asChild
+                                                onClick={() => setMobileOpen(false)}
+                                            >
+                                                <Link href="/register">Create Account</Link>
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    </SheetContent>
-                </Sheet>
+                        </SheetContent>
+                    </Sheet>
+                </div>
             </div>
         </header>
     );

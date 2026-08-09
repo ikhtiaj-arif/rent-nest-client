@@ -31,7 +31,6 @@ export default function DashboardPropertyCard({
     // MODIFIED: Always show image container with fallback
     const primaryImage = images?.find(img => img.isPrimary)?.url || images?.[0]?.url || '/placeholder-property.png';
       const imageSrc = images?.[0]?.url || '/placeholder-property.png';
-    console.log("imageSrc", images);
     return (
         <Card className="overflow-hidden hover:shadow-lg transition-shadow border border-border">
             <div className="relative h-48 bg-muted overflow-hidden">
