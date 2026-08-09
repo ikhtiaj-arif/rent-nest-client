@@ -507,7 +507,7 @@ Developed by RentNest Development Team
 
 Developed by **Ikhtiaj Arif**
 
-Frontend-focused Full-Stack Engineer specializing in scalable web applications using Next.js, TypeScript, and modern React.
+Full-Stack Developer specializing in scalable web applications using Next.js, TypeScript, and modern React.
 ---
 
 ## 📝 Phase 1 Audit Changelog
