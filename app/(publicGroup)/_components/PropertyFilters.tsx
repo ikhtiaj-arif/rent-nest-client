@@ -111,7 +111,7 @@ export default function PropertyFilters({
                             variant="ghost"
                             size="sm"
                         >
-                            <Link href="/properties">
+                            <Link href="/properties" className="text-red-400">
                                 Clear
                             </Link>
                         </Button>

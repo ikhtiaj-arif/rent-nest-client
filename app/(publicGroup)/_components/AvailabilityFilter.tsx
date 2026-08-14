@@ -38,7 +38,7 @@ export default function AvailabilityFilter() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const [, startTransition] = useTransition();
+    const [isPending, startTransition] = useTransition();
 
     const currentValue = searchParams.get("isAvailable") ?? "all";
 
